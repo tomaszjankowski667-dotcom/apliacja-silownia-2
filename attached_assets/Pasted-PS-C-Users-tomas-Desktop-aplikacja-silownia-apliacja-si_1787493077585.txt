@@ -1,0 +1,34 @@
+PS C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main> py -3 vision\vision_exercise_analyzer.py --video ".\test_exercise.mp4" --out ".\wynik_hantle_naprawiony.mp4" --exercise Flat_Dumbbell_Press                                                                                                                                                      
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1787493024.969539    6788 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1787493026.666896    6788 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+WARNING: Logging before InitGoogle() is written to STDERR
+W0000 00:00:1787493029.740013    1060 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1787493029.766535   23420 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1787493029.796032    4672 landmark_projection_calculator.cc:81] Using NORM_RECT without IMAGE_DIMENSIONS is only supported for the square ROI. Provide IMAGE_DIMENSIONS or use PROJECTION_MATRIX.
+{
+  "input_video": "test_exercise.mp4",
+  "output_video": ".\\wynik_hantle_naprawiony.mp4",
+  "exercise": "Flat_Dumbbell_Press",
+  "selected_track_id": 0,
+  "near_arm": "left",
+  "reference_frame": 1,
+  "reference_bar_center": [
+    574.1,
+    628.3
+  ],
+  "analysis_mode": "bar_path_only",
+  "pose_quality_warning": "The dumbbell path is bound to the frame-1 lifter's hand, but full joint anatomy is not stable enough for a technique score.",
+  "completed_reps": 3,
+  "rep_scores": [
+    91,
+    94,
+    91
+  ],
+  "final_score": 92,
+  "equipment_tracking_coverage": 0.834,
+  "camera_yaw_degrees": 0.0
+}
+PS C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main> 

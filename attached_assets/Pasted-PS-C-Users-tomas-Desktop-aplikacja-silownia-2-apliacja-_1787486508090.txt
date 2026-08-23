@@ -1,0 +1,23 @@
+PS C:\Users\tomas\Desktop\aplikacja silownia 2\apliacja-silownia-2-main> py -3 vision\vision_exercise_analyzer.py --video "C:\Users\tomas\Desktop\aplikacja silownia 2\seria_1787481974588.mp4" --out attached_assets\test_wynik.mp4 --exercise Flat_Barbell_Press                                                                                                      
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1787486474.558442   15072 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1787486476.236369   15072 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+Traceback (most recent call last):
+  File "C:\Users\tomas\Desktop\aplikacja silownia 2\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 1502, in <module>
+    _main()
+    ~~~~~^^
+  File "C:\Users\tomas\Desktop\aplikacja silownia 2\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 1498, in _main
+    analyze_video_with_model(args.video, args.out, args.exercise, model_path=args.model, near_arm=args.near_arm)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\tomas\Desktop\aplikacja silownia 2\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 1317, in analyze_video_with_model
+    raise FileNotFoundError(f"Input video does not exist: {source}")
+FileNotFoundError: Input video does not exist: C:\Users\tomas\Desktop\aplikacja silownia 2\seria_1787481974588.mp4
+PS C:\Users\tomas\Desktop\aplikacja silownia 2\apliacja-silownia-2-main> Get-ChildItem -Recurse -Filter *.mp4 | Select-Object FullName
+
+FullName                                                                      
+--------                                                                      
+C:\Users\tomas\Desktop\aplikacja silownia 2\apliacja-silownia-2-main\seria.mp4
+
+
+PS C:\Users\tomas\Desktop\aplikacja silownia 2\apliacja-silownia-2-main> 

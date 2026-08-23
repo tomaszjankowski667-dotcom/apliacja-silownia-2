@@ -1,0 +1,5 @@
+- [Vision confidence policy](vision-confidence-policy.md) — gym-video measurements must fail closed when subject, equipment, or anatomical evidence is ambiguous.
+- [First-frame video reference](first-frame-video-reference.md) — exercise analysis keeps an immutable frame-one equipment origin and never recenters from later observations.
+- [Dumbbell path confidence](dumbbell-path-confidence.md) — hex dumbbells follow the frame-one lifter’s hand; post-set handling is excluded and scores require cross-rep evidence.
+- [Independent technique scores](independent-technique-scores.md) — equipment path and limb motion are separate; overall scoring exists only when both are reliable across every scored rep.
+- [Cross-platform pose retry](cross-platform-pose-retry.md) — retry exact no-rep failures once at a conservative alternate threshold; never retry unrelated quality failures.

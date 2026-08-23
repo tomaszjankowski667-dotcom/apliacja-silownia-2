@@ -1,0 +1,20 @@
+PS C:\Users\tomas\Desktop\aplikacja silownia 2\apliacja-silownia-2-main>  py -3 vision\vision_exercise_analyzer.py --video ".\test_exercise.mp4" --out ".\wynik_hantle.mp4" --exercise Flat_Dumbbell_Press                                                                                                                                                              
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1787487782.309150   26752 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1787487783.829692   26752 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+Traceback (most recent call last):
+  File "C:\Users\tomas\Desktop\aplikacja silownia 2\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 1517, in <module>
+    _main()
+    ~~~~~^^
+  File "C:\Users\tomas\Desktop\aplikacja silownia 2\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 1513, in _main
+    analyze_video_with_model(args.video, args.out, args.exercise, model_path=args.model, near_arm=args.near_arm)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\tomas\Desktop\aplikacja silownia 2\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 1356, in analyze_video_with_model
+    initial_plate = _select_reference_plate(gray_frames, fps)
+  File "C:\Users\tomas\Desktop\aplikacja silownia 2\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 722, in _select_reference_plate
+    raise RuntimeError(
+    ...<2 lines>...
+    )
+RuntimeError: Two different frame-1 circles show similarly strong press-like movement, so the exercised plate cannot be selected unambiguously.
+PS C:\Users\tomas\Desktop\aplikacja silownia 2\apliacja-silownia-2-main> 

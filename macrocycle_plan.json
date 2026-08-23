@@ -1,0 +1,50 @@
+{
+    "metadata": {
+        "split": "Upper_Lower",
+        "weekly_budgets": {
+            "chest": 13,
+            "back": 13,
+            "quads": 13,
+            "hamstrings": 13,
+            "side_delts": 8,
+            "rear_delts": 8,
+            "biceps": 8,
+            "triceps": 8,
+            "calves": 8,
+            "abs": 8
+        }
+    },
+    "schedule": {
+        "Day_1_Upper": {
+            "chest": 6,
+            "back": 6,
+            "side_delts": 4,
+            "rear_delts": 4,
+            "biceps": 4,
+            "triceps": 4
+        },
+        "Day_2_Lower": {
+            "quads": 6,
+            "hamstrings": 6,
+            "calves": 4,
+            "abs": 4
+        },
+        "Day_3_Rest": {},
+        "Day_4_Upper": {
+            "chest": 7,
+            "back": 7,
+            "side_delts": 4,
+            "rear_delts": 4,
+            "biceps": 4,
+            "triceps": 4
+        },
+        "Day_5_Lower": {
+            "quads": 7,
+            "hamstrings": 7,
+            "calves": 4,
+            "abs": 4
+        },
+        "Day_6_Rest": {},
+        "Day_7_Rest": {}
+    }
+}

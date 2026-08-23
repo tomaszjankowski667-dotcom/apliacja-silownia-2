@@ -1,0 +1,114 @@
+uploads = []
+generated = []
+
+[[outputs]]
+id = "l8Rv8EeYBwsTLtHd6g2n2"
+uri = "file://attached_assets/seria_wynik_pierwsza_klatka.mp4"
+type = "video"
+title = "Analiza zakotwiczona w pierwszej klatce"
+description = "Poprawiony wynik: stały punkt odniesienia z klatki 1, śledzenie talerza, 2 pełne powtórzenia i jawna ocena toru sztangi."
+logical_id = "b50d3454-0ae7-400d-b85d-0fc008bc1031"
+content_hash = "sha256:f4bbd3dd6c163ac7f1d5883de2f3332775234e36c3fb4cfd695b5076aa27fbc5"
+size = 3913100
+mtime_ms = 1787483180308
+storage_uri = "gcs://replit-rams-assets-kira/rams/assets/repl:2259baab-b101-4886-978f-5949e1ffd021/b50d3454-0ae7-400d-b85d-0fc008bc1031/ef3481ef-5658-4317-8807-36d36c938444"
+storage_version_token = "1787483260249580"
+content_type = "video/mp4"
+
+[[outputs]]
+id = "loBlF3nw_mCZos_9vIEwd"
+uri = "file://attached_assets/test_exercise_naprawiony_v2.mp4"
+type = "video"
+title = "Naprawiona analiza wyciskania hantli"
+description = "Tor przypisany do dłoni ćwiczącego od klatki 1, 3 pełne powtórzenia, ruch odkładania hantli i wstawania wykluczony z serii."
+logical_id = "c4c92625-3e14-41d8-9995-ea2a726e25a4"
+content_hash = "sha256:4608eb764da96f59ade4387272600edd6ba93a7934d39a6980ccbf830432f769"
+size = 11560794
+mtime_ms = 1787492159729
+storage_uri = "gcs://replit-rams-assets-kira/rams/assets/repl:2259baab-b101-4886-978f-5949e1ffd021/c4c92625-3e14-41d8-9995-ea2a726e25a4/417e3e9d-b09c-4aa4-baad-ec7b3e4b9986"
+storage_version_token = "1787492263837268"
+content_type = "video/mp4"
+
+[[outputs]]
+id = "oQiYQOkUmblhYxNA2_lW0"
+uri = "file://attached_assets/test_exercise_final_score.mp4"
+type = "video"
+title = "Hantle — FINAL SCORE"
+description = "Wersja z końcową planszą FINAL SCORE: 89%, 3 ukończone powtórzenia oraz informacją pomocniczą ANALYSIS: BAR PATH ONLY."
+logical_id = "d96d83e7-1592-4afe-83bf-d39aa94edaf7"
+content_hash = "sha256:497f7ab330a20e6ad46f281bba8cd253aca6fccdbd50858f58d8c22ab738d346"
+size = 11588369
+mtime_ms = 1787492799989
+storage_uri = "gcs://replit-rams-assets-kira/rams/assets/repl:2259baab-b101-4886-978f-5949e1ffd021/d96d83e7-1592-4afe-83bf-d39aa94edaf7/97463616-0378-489a-b7de-acb883581eae"
+storage_version_token = "1787492805965741"
+content_type = "video/mp4"
+
+[[outputs]]
+id = "yjWC9fR9rTwtgnD_VUW50"
+uri = "file://attached_assets/test_exercise_universal_anatomy_v2.mp4"
+type = "video"
+title = "Hantle — uniwersalna pełna anatomia"
+description = "Pełna analiza anatomii została włączona na podstawie jakości stawów i geometrii całego łańcucha ręki; 3 ukończone powtórzenia, FINAL SCORE 89%."
+logical_id = "a37ac635-922a-4986-aa9e-b7adb23a09f8"
+content_hash = "sha256:8b73c129707e827ce2827e33254d707c9dd196e2587318ac94450fabfade700b"
+size = 12028907
+mtime_ms = 1787494371148
+storage_uri = "gcs://replit-rams-assets-kira/rams/assets/repl:2259baab-b101-4886-978f-5949e1ffd021/a37ac635-922a-4986-aa9e-b7adb23a09f8/60b13ac9-352a-4929-a6b5-fe16b26424d6"
+storage_version_token = "1787494487685785"
+content_type = "video/mp4"
+
+[[outputs]]
+id = "z6pFAME71147yLXPfJPj5"
+uri = "file://attached_assets/k_auto_reference_final.mp4"
+type = "video"
+title = "Sztanga — automatyczna referencja"
+description = "Wynik dla k.mp4 bez ręcznego przycinania: referencja ze środka obu dłoni jednego ćwiczącego, 5 ukończonych cykli i pełna anatomia."
+logical_id = "d3ada487-5651-4861-b383-4f316b9a7fc7"
+content_hash = "sha256:a2ebc4353bb150c5e8d4a492c558c76da362303d314fead5f3ec64a7320a7a20"
+size = 2581390
+mtime_ms = 1787496140000
+storage_uri = "gcs://replit-rams-assets-kira/rams/assets/repl:2259baab-b101-4886-978f-5949e1ffd021/d3ada487-5651-4861-b383-4f316b9a7fc7/04f00465-8f26-4028-af52-f94e2db08779"
+storage_version_token = "1787496254328698"
+content_type = "video/mp4"
+
+[[outputs]]
+id = "d0yD9J98zcKn1SbRSVzie"
+uri = "file://attached_assets/k1_separate_scores_final.mp4"
+type = "video"
+title = "k1 — osobne wyniki techniki"
+description = "Trajektoria sztangi 62%; ruch kończyn i wynik ogólny oznaczone jako N/A z powodu niejednoznacznego toru osoby."
+logical_id = "aee557a0-f028-4c11-a31b-761ac70462a3"
+content_hash = "sha256:ed34dd4361a3aae00352d72b25e62dde0a3a88392903333afb87541db592634e"
+size = 2651279
+mtime_ms = 1787497516003
+storage_uri = "gcs://replit-rams-assets-kira/rams/assets/repl:2259baab-b101-4886-978f-5949e1ffd021/aee557a0-f028-4c11-a31b-761ac70462a3/7cd50d2d-93a4-4549-b79a-148922c09f1a"
+storage_version_token = "1787497719148855"
+content_type = "video/mp4"
+
+[[outputs]]
+id = "7tG5cySWZn1o9ipB2vPiC"
+uri = "file://attached_assets/k2_separate_scores_final.mp4"
+type = "video"
+title = "k2 — osobne wyniki techniki"
+description = "7 powtórzeń; trajektoria sztangi 66%; ruch kończyn i wynik ogólny oznaczone jako N/A z powodu niejednoznacznego toru osoby."
+logical_id = "6390e57b-dd78-4d24-a63e-a3c86c01ede4"
+content_hash = "sha256:690474df05a9a513c268e8a905f218c026e32832e5c258a5db01021b60327da5"
+size = 4005565
+mtime_ms = 1787497668751
+storage_uri = "gcs://replit-rams-assets-kira/rams/assets/repl:2259baab-b101-4886-978f-5949e1ffd021/6390e57b-dd78-4d24-a63e-a3c86c01ede4/6fff1eac-9fae-4798-b016-9390410af988"
+storage_version_token = "1787497719916212"
+content_type = "video/mp4"
+
+[[outputs]]
+id = "oAkL_zl2c-AsVrQ4Yu2Uk"
+uri = "file://attached_assets/k_cross_platform_retry.mp4"
+type = "video"
+title = "k — wynik po poprawce zgodności"
+description = "5 powtórzeń; trajektoria sztangi 81%, ruch kończyn 96%, wynik końcowy 88%."
+logical_id = "0d8b4b7a-2c15-4355-9e50-332d3c2bd7f6"
+content_hash = "sha256:422da8b6a6db80e4b0b8168ff7d4ea69f7db29c725f4d35b23f0edce53a5e316"
+size = 2624547
+mtime_ms = 1787499565550
+storage_uri = "gcs://replit-rams-assets-kira/rams/assets/repl:2259baab-b101-4886-978f-5949e1ffd021/0d8b4b7a-2c15-4355-9e50-332d3c2bd7f6/dc3edf69-4c8f-4aa4-a867-0391104428b6"
+storage_version_token = "1787499669277699"
+content_type = "video/mp4"

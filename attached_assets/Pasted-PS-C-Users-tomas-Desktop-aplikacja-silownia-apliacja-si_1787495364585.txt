@@ -1,0 +1,23 @@
+PS C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main> py -3 vision\vision_exercise_analyzer.py --video ".\k.mp4" --out ".\wynik_sztanga1.mp4" --exercise Flat_Barbell_Press
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1787495319.021135   10696 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1787495320.772941   10696 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+WARNING: Logging before InitGoogle() is written to STDERR
+W0000 00:00:1787495323.037773    6808 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1787495323.053198   25604 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1787495323.081184    6808 landmark_projection_calculator.cc:81] Using NORM_RECT without IMAGE_DIMENSIONS is only supported for the square ROI. Provide IMAGE_DIMENSIONS or use PROJECTION_MATRIX.
+Traceback (most recent call last):
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 1973, in <module>
+    _main()
+    ~~~~~^^
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 1969, in _main
+    analyze_video_with_model(args.video, args.out, args.exercise, model_path=args.model, near_arm=args.near_arm)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 1775, in analyze_video_with_model
+    raise RuntimeError(
+    ...<2 lines>...
+    )
+RuntimeError: The first frame does not contain a reliable equipment reference. Start the clip with the exercised hand and load clearly visible.
+PS C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main> 

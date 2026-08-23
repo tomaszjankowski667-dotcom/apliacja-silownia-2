@@ -1,0 +1,25 @@
+PS C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main> py -3 vision\vision_exercise_analyzer.py --video ".\k.mp4" --out ".\wynik_k.mp4" --exercise Flat_Barbell_Press
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1787498590.173519    5144 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+WARNING: All log messages before absl::InitializeLog() is called are written to STDERR
+I0000 00:00:1787498591.900619    5144 port.cc:153] oneDNN custom operations are on. You may see slightly different numerical results due to floating-point round-off errors from different computation orders. To turn them off, set the environment variable `TF_ENABLE_ONEDNN_OPTS=0`.
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+WARNING: Logging before InitGoogle() is written to STDERR
+W0000 00:00:1787498594.097449    5716 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1787498594.112530    5716 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1787498594.142315   12308 landmark_projection_calculator.cc:81] Using NORM_RECT without IMAGE_DIMENSIONS is only supported for the square ROI. Provide IMAGE_DIMENSIONS or use PROJECTION_MATRIX.
+W0000 00:00:1787498605.854906    6360 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1787498605.868330   24124 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+Traceback (most recent call last):
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 2266, in <module>
+    _main()
+    ~~~~~^^
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 2262, in _main
+    analyze_video_with_model(args.video, args.out, args.exercise, model_path=args.model, near_arm=args.near_arm)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 2111, in analyze_video_with_model
+    raise RuntimeError(
+    ...<2 lines>...
+    )
+RuntimeError: The equipment tracker did not find any complete repetitions. A complete repetition needs a visible top-bottom-top bar path.
+PS C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main> 

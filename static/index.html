@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Biomech AI - Edge Edition</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+  <!-- MediaPipe Pose JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js" crossorigin="anonymous"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@mediapipe/pose/pose.js" crossorigin="anonymous"></script>
+  <style>
+    body { background-color: #0d0f12; color: #f3f4f6; }
+    .glass-card { background: rgba(23, 27, 34, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+    .glow-orange { box-shadow: 0 0 25px -5px rgba(249, 115, 22, 0.4); }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between font-sans pb-6">
+
+  <header class="p-4 flex items-center justify-between border-b border-gray-800 bg-[#12161c]">
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-lg bg-orange-500 flex items-center justify-center font-black text-black text-lg">
+        <i class="fa-solid fa-bolt"></i>
+      </div>
+      <h1 class="text-lg font-bold tracking-wide">BIOMECH <span class="text-orange-500">EDGE</span></h1>
+    </div>
+    <span class="text-xs bg-gray-800 text-gray-400 px-2.5 py-1 rounded-full border border-gray-700 flex items-center gap-1.5">
+      <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span> ON-DEVICE
+    </span>
+  </header>
+
+  <main class="flex-1 p-4 max-w-md mx-auto w-full space-y-4">
+
+    <!-- Ekran wyboru pliku -->
+    <div id="uploadSection" class="glass-card rounded-2xl p-6 text-center border-2 border-dashed border-gray-700">
+      <input type="file" id="videoInput" accept="video/*" class="hidden" />
+      <div class="w-16 h-16 mx-auto mb-3 rounded-full bg-orange-500/10 flex items-center justify-center text-orange-500 text-2xl">
+        <i class="fa-solid fa-microchip"></i>
+      </div>
+      <h3 class="font-bold text-base mb-1">Przetwarzanie Lokalne (Edge)</h3>
+      <p class="text-xs text-gray-400 mb-4">Wideo jest analizowane bezpośrednio na Twoim telefonie</p>
+
+      <button onclick="document.getElementById('videoInput').click()" class="w-full bg-gradient-to-r from-orange-500 to-amber-500 text-black font-bold py-3 px-4 rounded-xl shadow-lg glow-orange flex items-center justify-center gap-2 text-sm active:scale-95 transition-transform">
+        <i class="fa-solid fa-video"></i> Wybierz wideo do analizy
+      </button>
+    </div>
+
+    <!-- Płótno Canvas z rysowaną trajektorią na telefonie -->
+    <div id="previewContainer" class="glass-card rounded-2xl p-2 relative hidden overflow-hidden">
+      <video id="sourceVideo" class="hidden" playsinline muted></video>
+      <canvas id="outputCanvas" class="w-full rounded-xl bg-black aspect-[9/16] object-contain"></canvas>
+      <div id="processingBadge" class="absolute top-4 left-4 bg-black/70 px-3 py-1 rounded-full text-xs font-bold text-orange-400 border border-orange-500/40 flex items-center gap-2">
+        <span class="w-2 h-2 rounded-full bg-orange-500 animate-ping"></span> Analizowanie klatek na telefonie...
+      </div>
+    </div>
+
+    <!-- Panel Wyników z Serwera -->
+    <div id="resultsSection" class="space-y-4 hidden">
+      <div class="grid grid-cols-2 gap-3">
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <span class="text-xs text-gray-400 font-semibold uppercase">Zgodność Ruchu</span>
+          <div id="scoreDisplay" class="text-3xl font-black text-green-400 mt-1">--%</div>
+        </div>
+        <div class="glass-card rounded-2xl p-4 text-center">
+          <span class="text-xs text-gray-400 font-semibold uppercase">Powtórzenia</span>
+          <div id="repsDisplay" class="text-3xl font-black text-orange-400 mt-1">--</div>
+        </div>
+      </div>
+
+      <div class="glass-card rounded-2xl p-4 border-l-4 border-orange-500 glow-orange">
+        <div class="flex items-center gap-2 mb-2">
+          <i class="fa-solid fa-robot text-orange-500 text-sm"></i>
+          <h4 class="text-xs font-bold uppercase tracking-wider text-orange-400">Instrukcja od Trenera AI</h4>
+        </div>
+        <p id="feedbackDisplay" class="text-sm text-gray-200 leading-relaxed"></p>
+      </div>
+
+      <button onclick="location.reload()" class="w-full bg-gray-800 hover:bg-gray-700 text-gray-200 font-bold py-3 rounded-xl text-sm border border-gray-700 flex items-center justify-center gap-2">
+        <i class="fa-solid fa-rotate-left"></i> Przeanalizuj kolejną serię
+      </button>
+    </div>
+
+  </main>
+
+  <script>
+    const videoInput = document.getElementById('videoInput');
+    const sourceVideo = document.getElementById('sourceVideo');
+    const outputCanvas = document.getElementById('outputCanvas');
+    const ctx = outputCanvas.getContext('2d');
+
+    const uploadSection = document.getElementById('uploadSection');
+    const previewContainer = document.getElementById('previewContainer');
+    const resultsSection = document.getElementById('resultsSection');
+    const processingBadge = document.getElementById('processingBadge');
+
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const repsDisplay = document.getElementById('repsDisplay');
+    const feedbackDisplay = document.getElementById('feedbackDisplay');
+
+    let collectedLandmarks = [];
+    let frameCounter = 0;
+    const trajectoryLeft = [];
+    const trajectoryRight = [];
+
+    // Konfiguracja MediaPipe w przeglądarce telefonu
+    const pose = new Pose({
+      locateFile: (file) => `https://cdn.jsdelivr.net/npm/@mediapipe/pose/${file}`
+    });
+
+    pose.setOptions({
+      modelComplexity: 1,
+      smoothLandmarks: true,
+      minDetectionConfidence: 0.5,
+      minTrackingConfidence: 0.5
+    });
+
+    pose.onResults((results) => {
+      ctx.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
+      ctx.drawImage(results.image, 0, 0, outputCanvas.width, outputCanvas.height);
+
+      if (results.poseLandmarks) {
+        const lm = results.poseLandmarks;
+        const w = outputCanvas.width;
+        const h = outputCanvas.height;
+
+        const lSh = [lm[11].x * w, lm[11].y * h];
+        const lEl = [lm[13].x * w, lm[13].y * h];
+        const lWr = [lm[15].x * w, lm[15].y * h];
+
+        const rSh = [lm[12].x * w, lm[12].y * h];
+        const rEl = [lm[14].x * w, lm[14].y * h];
+        const rWr = [lm[16].x * w, lm[16].y * h];
+
+        collectedLandmarks.push({
+          frame_idx: frameCounter++,
+          l_sh: lSh, l_el: lEl, l_wr: lWr,
+          r_sh: rSh, r_el: rEl, r_wr: rWr
+        });
+
+        trajectoryLeft.push(lWr);
+        trajectoryRight.push(rWr);
+
+        // Rysowanie szkieletu na telefonie
+        ctx.strokeStyle = '#3b82f6';
+        ctx.lineWidth = 4;
+        [[lSh, rSh], [lSh, lEl], [lEl, lWr], [rSh, rEl], [rEl, rWr]].forEach(([p1, p2]) => {
+          ctx.beginPath();
+          ctx.moveTo(p1[0], p1[1]);
+          ctx.lineTo(p2[0], p2[1]);
+          ctx.stroke();
+        });
+
+        // Rysowanie trajektorii pomarańczowej
+        ctx.strokeStyle = '#f97316';
+        ctx.lineWidth = 3;
+        for(let i = 1; i < trajectoryLeft.length; i++) {
+          ctx.beginPath();
+          ctx.moveTo(trajectoryLeft[i-1][0], trajectoryLeft[i-1][1]);
+          ctx.lineTo(trajectoryLeft[i][0], trajectoryLeft[i][1]);
+          ctx.stroke();
+        }
+      }
+    });
+
+    videoInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      uploadSection.classList.add('hidden');
+      previewContainer.classList.remove('hidden');
+
+      sourceVideo.src = URL.createObjectURL(file);
+      sourceVideo.onloadedmetadata = () => {
+        outputCanvas.width = sourceVideo.videoWidth || 720;
+        outputCanvas.height = sourceVideo.videoHeight || 1280;
+        sourceVideo.play();
+        processFrames();
+      };
+    });
+
+    async function processFrames() {
+      if (sourceVideo.paused || sourceVideo.ended) {
+        if (sourceVideo.ended) {
+          sendLandmarksToServer();
+        }
+        return;
+      }
+      await pose.send({ image: sourceVideo });
+      requestAnimationFrame(processFrames);
+    }
+
+    async function sendLandmarksToServer() {
+      processingBadge.textContent = "Wysyłanie danych JSON do AI...";
+
+      try {
+        const response = await fetch('/api/analyze-landmarks', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            exercise: 'dumbbell_bench_press',
+            landmarks: collectedLandmarks
+          })
+        });
+
+        const data = await response.json();
+        processingBadge.classList.add('hidden');
+        scoreDisplay.textContent = `${data.score}%`;
+        repsDisplay.textContent = data.reps;
+        feedbackDisplay.textContent = data.ai_coach_feedback;
+        resultsSection.classList.remove('hidden');
+      } catch (err) {
+        alert("Błąd połączenia: " + err.message);
+      }
+    }
+  </script>
+</body>
+</html>

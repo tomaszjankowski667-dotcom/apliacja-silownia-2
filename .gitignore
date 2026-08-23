@@ -1,0 +1,29 @@
+# Środowiska wirtualne Pythona
+venv/
+env/
+.env
+
+# Cache i skompilowane pliki Pythona (tworzą się same)
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Bazy danych i pliki tymczasowe wypluwane przez nasz kod
+*.db
+*.sqlite3
+*_scores.txt
+user_bio_profile.json
+temp_*/
+
+# Modele uczenia maszynowego i prywatne dane testowe
+*.task
+*.jpg
+*.jpeg
+*.png
+*.mp4
+
+# Pliki konfiguracyjne IDE (np. to, co tworzy Twój PyCharm/VSCode)
+.idea/
+.vscode/
+.DS_Store
