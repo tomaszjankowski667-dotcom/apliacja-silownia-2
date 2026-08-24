@@ -4,10 +4,10 @@ version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.12"
 dependencies = [
-    "fastapi>=0.141.1",
-    "mediapipe>=1.0.1",
-    "numpy>=2.5.2",
-    "opencv-python>=5.0.0.93",
-    "pydantic>=2.13.4",
-    "uvicorn>=0.52.4",
+    "fastapi==0.141.1",
+    "mediapipe==1.0.1",
+    "numpy==2.5.2",
+    "opencv-python==5.0.0.93",
+    "pydantic==2.13.4",
+    "uvicorn==0.52.4",
 ]

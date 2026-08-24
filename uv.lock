@@ -802,12 +802,12 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
-    { name = "fastapi", specifier = ">=0.141.1" },
-    { name = "mediapipe", specifier = ">=1.0.1" },
-    { name = "numpy", specifier = ">=2.5.2" },
-    { name = "opencv-python", specifier = ">=5.0.0.93" },
-    { name = "pydantic", specifier = ">=2.13.4" },
-    { name = "uvicorn", specifier = ">=0.52.4" },
+    { name = "fastapi", specifier = "==0.141.1" },
+    { name = "mediapipe", specifier = "==1.0.1" },
+    { name = "numpy", specifier = "==2.5.2" },
+    { name = "opencv-python", specifier = "==5.0.0.93" },
+    { name = "pydantic", specifier = "==2.13.4" },
+    { name = "uvicorn", specifier = "==0.52.4" },
 ]
 
 [[package]]

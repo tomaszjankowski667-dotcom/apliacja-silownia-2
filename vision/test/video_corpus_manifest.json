@@ -1,0 +1,29 @@
+{
+  "exercise": "Flat_Barbell_Press",
+  "recordings": [
+    {"file": "k_1787495418440.mp4", "compatible": true},
+    {
+      "file": "k1_1787496823763.mp4",
+      "compatible": null,
+      "expected": "reject_uncertain",
+      "note": "The movement is correct, but the axial plate occludes any shared-shaft proof; fail closed."
+    },
+    {"file": "k2_1787496814478.mp4", "compatible": true},
+    {"file": "k3_1787523808216.mp4", "compatible": false},
+    {"file": "k4_1787523814425.mp4", "compatible": true},
+    {"file": "k5_1787523814426.mp4", "compatible": false},
+    {"file": "k6_1787523814426.mp4", "compatible": false},
+    {"file": "k7_1787523814426.mp4", "compatible": false},
+    {"file": "k8_1787523814427.mp4", "compatible": true},
+    {"file": "k9_1787523814427.mp4", "compatible": true},
+    {"file": "k10_1787523814428.mp4", "compatible": false},
+    {"file": "k11_1787523814428.mp4", "compatible": false},
+    {"file": "k12_1787523814428.mp4", "compatible": false},
+    {"file": "k13_1787523814429.mp4", "compatible": false},
+    {"file": "k14_1787523814429.mp4", "compatible": false},
+    {"file": "k15_1787523814423.mp4", "compatible": false},
+    {"file": "k16_1787523814424.mp4", "compatible": false},
+    {"file": "k17_1787523814425.mp4", "compatible": false},
+    {"file": "k18_1787523814425.mp4", "compatible": false}
+  ]
+}

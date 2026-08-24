@@ -3,3 +3,4 @@
 - [Dumbbell path confidence](dumbbell-path-confidence.md) — hex dumbbells follow the frame-one lifter’s hand; post-set handling is excluded and scores require cross-rep evidence.
 - [Independent technique scores](independent-technique-scores.md) — equipment path and limb motion are separate; overall scoring exists only when both are reliable across every scored rep.
 - [Cross-platform pose retry](cross-platform-pose-retry.md) — retry exact no-rep failures once at a conservative alternate threshold; never retry unrelated quality failures.
+- [Video corpus regression policy](video-corpus-regression-policy.md) — validate requested-exercise decisions against every supplied recording, including confirmed mismatches.

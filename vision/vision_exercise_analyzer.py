@@ -14,6 +14,7 @@ Usage:
 from __future__ import annotations
 
 import argparse
+import importlib
 import json
 import math
 import os
@@ -23,12 +24,27 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable, Iterable, Optional
 
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from vision.runtime_config import configure_deterministic_runtime
+
+RUNTIME_CONFIG = configure_deterministic_runtime()
+
 import cv2
 import mediapipe as mp
 import numpy as np
 
+from vision.exercise_compatibility import (
+    ExerciseMismatchError,
+    evaluate_barbell_press_preflight,
+    select_requested_exercise_track,
+)
+from vision.exercise_registry import ExerciseSpec, get_exercise_spec
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
+cv2.setNumThreads(RUNTIME_CONFIG.opencv_threads)
+
 DEFAULT_MODEL_NAME = "pose_landmarker_lite.task"
 MODEL_URL = (
     "https://storage.googleapis.com/mediapipe-models/pose_landmarker/"
@@ -181,18 +197,19 @@ def _ensure_model(model_path: Optional[str | Path] = None) -> Path:
     return destination
 
 
-def _load_exercise_model(exercise_key: str) -> tuple[dict, dict, Callable]:
+def _load_exercise_model(
+    exercise_key: str,
+) -> tuple[ExerciseSpec, dict, dict, Callable]:
     """Load lever lengths and the existing 3D motion template without globals."""
-    if str(PROJECT_ROOT) not in sys.path:
-        sys.path.insert(0, str(PROJECT_ROOT))
+    spec = get_exercise_spec(exercise_key)
 
     try:
         from user_data import PROFILES
-        from analyze import analyze_mid_chest as chest_analyzer
+        template_module = importlib.import_module(spec.template_module)
     except ImportError as error:
         raise RuntimeError(
             "Could not load the local exercise templates. "
-            "The analyzer requires user_data.py and analyze/analyze_mid_chest.py."
+            f"The analyzer requires user_data.py and {spec.template_module}."
         ) from error
 
     profile = next(iter(PROFILES.values()), {}) if isinstance(PROFILES, dict) else {}
@@ -205,12 +222,12 @@ def _load_exercise_model(exercise_key: str) -> tuple[dict, dict, Callable]:
     levers.setdefault("L_torso", 0.50)
     levers.setdefault("chest_block", 0.24)
 
-    database = chest_analyzer.get_exercises_data(profile)
+    database = template_module.get_exercises_data(profile)
     if exercise_key not in database:
         available = ", ".join(sorted(database))
         raise ValueError(f"Unknown exercise '{exercise_key}'. Available: {available}")
     exercise = database[exercise_key]
-    return levers, exercise, exercise["trajectory_func"]
+    return spec, levers, exercise, exercise["trajectory_func"]
 
 
 # ---------------------------------------------------------------------------
@@ -634,20 +651,29 @@ def _valid_observed_elbow(
 
 
 def _valid_arm_chain(
-        shoulder: Optional[np.ndarray],
-        elbow: Optional[np.ndarray],
-        wrist: Optional[np.ndarray],
-        humerus_px: float,
-        forearm_px: float,
-        quality: float,
+    shoulder: Optional[np.ndarray],
+    elbow: Optional[np.ndarray],
+    wrist: Optional[np.ndarray],
+    humerus_px: float,
+    forearm_px: float,
+    quality: float,
 ) -> bool:
     """Validate an observed 2-D arm without crashing on frontal perspectives."""
-    # Jeśli punktów nie ma lub ich pewność jest mniejsza niż 0.15 - odrzuć
-    if not (_valid_point(shoulder) and _valid_point(elbow) and _valid_point(wrist)):
+    if (
+        quality < 0.35
+        or not _valid_point(shoulder)
+        or not _valid_point(elbow)
+        or not _valid_point(wrist)
+    ):
         return False
-
-    # Wymuś akceptację kości niezależnie od skrótu perspektywicznego
-    return True
+    observed_humerus = float(np.linalg.norm(elbow - shoulder))
+    observed_forearm = float(np.linalg.norm(wrist - elbow))
+    observed_reach = float(np.linalg.norm(wrist - shoulder))
+    return (
+        humerus_px * 0.45 <= observed_humerus <= humerus_px * 1.45
+        and forearm_px * 0.45 <= observed_forearm <= forearm_px * 1.45
+        and observed_reach <= (humerus_px + forearm_px) * 1.08
+    )
 
 
 def _anatomy_reliability_warning(
@@ -664,7 +690,6 @@ def _anatomy_reliability_warning(
     fps: float,
 ) -> Optional[str]:
     """Return a reason to suppress anatomy when joint evidence is insufficient."""
-    return None
     if not _valid_point(anchor_shoulder) or end_frame < start_frame:
         return "No stable frame-one shoulder anchor was available for an anatomical score."
     if not (
@@ -1397,6 +1422,117 @@ def _track_equipment(
     return path, confidence, radii
 
 
+def _bar_shaft_support_ratio(
+    gray_frames: list[np.ndarray],
+    equipment_path: list[Optional[np.ndarray]],
+    equipment_confidence: list[float],
+    equipment_radii: list[float],
+    track: PersonTrack,
+) -> float:
+    """Measure repeated long image edges from one plate through both hands."""
+    candidates = {
+        sample.frame_index: sample.candidate
+        for sample in track.samples
+        if sample.candidate is not None
+    }
+    usable = [
+        index
+        for index, (point, quality) in enumerate(
+            zip(equipment_path, equipment_confidence)
+        )
+        if index in candidates
+        and _valid_point(point)
+        and quality >= 0.55
+        and index < len(gray_frames)
+        and index < len(equipment_radii)
+    ]
+    if not usable:
+        return 0.0
+    step = max(1, len(usable) // 16)
+    sampled = usable[::step][:16]
+    supported = 0
+    evaluated = 0
+    for index in sampled:
+        candidate = candidates[index]
+        left = candidate.points.get(LEFT_WRIST)
+        right = candidate.points.get(RIGHT_WRIST)
+        if (
+            candidate.visibility.get(LEFT_WRIST, 0.0) < 0.35
+            or candidate.visibility.get(RIGHT_WRIST, 0.0) < 0.35
+            or not _valid_point(left)
+            or not _valid_point(right)
+        ):
+            continue
+        plate = np.asarray(equipment_path[index], dtype=float)
+        wrists = [
+            np.asarray(left, dtype=float),
+            np.asarray(right, dtype=float),
+        ]
+        far_wrist = max(wrists, key=lambda wrist: np.linalg.norm(wrist - plate))
+        direction = far_wrist - plate
+        distance = float(np.linalg.norm(direction))
+        if distance < 36.0:
+            continue
+        unit = direction / distance
+        margin = max(14, int(round(candidate.body_scale * 0.10)))
+        x0 = max(0, int(np.floor(min(plate[0], far_wrist[0]) - margin)))
+        y0 = max(0, int(np.floor(min(plate[1], far_wrist[1]) - margin)))
+        x1 = min(
+            gray_frames[index].shape[1],
+            int(np.ceil(max(plate[0], far_wrist[0]) + margin)),
+        )
+        y1 = min(
+            gray_frames[index].shape[0],
+            int(np.ceil(max(plate[1], far_wrist[1]) + margin)),
+        )
+        if x1 - x0 < 24 or y1 - y0 < 16:
+            continue
+        edges = cv2.Canny(gray_frames[index][y0:y1, x0:x1], 45, 130)
+        lines = cv2.HoughLinesP(
+            edges,
+            1,
+            np.pi / 180.0,
+            threshold=16,
+            minLineLength=max(18, int(round(distance * 0.20))),
+            maxLineGap=12,
+        )
+        evaluated += 1
+        if lines is None:
+            continue
+        for raw_line in np.asarray(lines).reshape(-1, 4):
+            start = np.array(
+                [float(raw_line[0] + x0), float(raw_line[1] + y0)]
+            )
+            end = np.array(
+                [float(raw_line[2] + x0), float(raw_line[3] + y0)]
+            )
+            line = end - start
+            length = float(np.linalg.norm(line))
+            if length <= 0.0 or abs(float(np.dot(line / length, unit))) < 0.94:
+                continue
+            midpoint = (start + end) / 2.0
+            offset = midpoint - plate
+            perpendicular = abs(
+                float(unit[0] * offset[1] - unit[1] * offset[0])
+            )
+            if perpendicular > margin:
+                continue
+            projections = sorted(
+                [
+                    float(np.dot(start - plate, unit)),
+                    float(np.dot(end - plate, unit)),
+                ]
+            )
+            maximum_start = max(
+                distance * 0.25,
+                float(equipment_radii[index]) * 1.25,
+            )
+            if projections[0] <= maximum_start and projections[1] >= distance * 0.65:
+                supported += 1
+                break
+    return supported / max(1, evaluated)
+
+
 def _validate_equipment_track(
     path: list[Optional[np.ndarray]],
     confidence: list[float],
@@ -1954,7 +2090,7 @@ def _analyze_video_once(
     if not 0.05 <= min_pose_confidence <= 0.95:
         raise ValueError("min_pose_confidence must be between 0.05 and 0.95.")
 
-    levers, _, trajectory_func = _load_exercise_model(exercise_key)
+    exercise_spec, levers, _, trajectory_func = _load_exercise_model(exercise_key)
     pose_model = _ensure_model(model_path)
     capture = cv2.VideoCapture(str(source))
     if not capture.isOpened():
@@ -1970,13 +2106,17 @@ def _analyze_video_once(
     if len(frames) < max(8, int(fps * 0.6)):
         raise RuntimeError("The input video is too short for a reliable movement analysis.")
 
-    dumbbell_mode = "Dumbbell" in exercise_key
+    dumbbell_mode = exercise_spec.tracking_mode == "dumbbell"
     height, width = frames[0].shape[:2]
     gray_frames = [cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY) for frame in frames]
     source_start_frame = 0
     initial_plate: Optional[tuple[np.ndarray, float]] = None
+    equipment_provenance = "unconfirmed"
     candidates_by_frame = _detect_candidates(frames, pose_model, min_pose_confidence)
     tracks = _build_person_tracks(candidates_by_frame, fps)
+    preflight_compatibility = evaluate_barbell_press_preflight(tracks, fps)
+    if not preflight_compatibility.compatible:
+        raise ExerciseMismatchError(exercise_key, preflight_compatibility)
     dumbbell_tracking: Optional[tuple[list[Optional[np.ndarray]], list[float], list[float]]] = None
     dumbbell_side: Optional[str] = None
     dumbbell_lifter: Optional[PersonTrack] = None
@@ -1989,6 +2129,7 @@ def _analyze_video_once(
             near_arm,
         )
         dumbbell_tracking = (dumbbell_path, dumbbell_confidence, dumbbell_radii)
+        equipment_provenance = "visual_dumbbell"
         initial_plate = (
             (dumbbell_path[0], dumbbell_radii[0])
             if _valid_point(dumbbell_path[0]) and dumbbell_radii[0] > 0.0
@@ -2009,20 +2150,28 @@ def _analyze_video_once(
             _valid_point(grip_path[0])
             and grip_confidence[0] >= 0.70
             and _grip_track_is_reliable(grip_path, grip_confidence, fps)
-            and (plate_reference is None or plate_start_frame > 0)
+            and plate_reference is None
         )
         if use_grip_reference:
             initial_plate = (grip_path[0], grip_radii[0])
             barbell_grip_tracking = (grip_path, grip_confidence, grip_radii)
             barbell_grip_lifter = confirmed_grip_lifter
+            equipment_provenance = "pose_grip_fallback"
         else:
             source_start_frame, initial_plate = plate_start_frame, plate_reference
+            if initial_plate is not None:
+                equipment_provenance = "visual_plate"
             if source_start_frame:
                 frames = frames[source_start_frame:]
                 gray_frames = gray_frames[source_start_frame:]
                 height, width = frames[0].shape[:2]
                 candidates_by_frame = _detect_candidates(frames, pose_model, min_pose_confidence)
                 tracks = _build_person_tracks(candidates_by_frame, fps)
+                preflight_compatibility = evaluate_barbell_press_preflight(tracks, fps)
+                if not preflight_compatibility.compatible:
+                    raise ExerciseMismatchError(
+                        exercise_key, preflight_compatibility
+                    )
     if initial_plate is None and not dumbbell_mode:
         try:
             barbell_grip_lifter = _choose_lifter(tracks, height, fps)
@@ -2041,6 +2190,7 @@ def _analyze_video_once(
             initial_plate = (grip_path[0], grip_radii[0])
             barbell_grip_tracking = (grip_path, grip_confidence, grip_radii)
             barbell_grip_lifter = confirmed_grip_lifter
+            equipment_provenance = "pose_grip_fallback"
     if initial_plate is None:
         raise RuntimeError(
             "No reliable equipment reference was found in the first usable seconds. "
@@ -2111,7 +2261,32 @@ def _analyze_video_once(
             anchor_shoulder,
             initial_detection=(reference.bar_center, reference.plate_radius),
         )
+    shaft_support_by_track = {
+        track.track_id: _bar_shaft_support_ratio(
+            gray_frames, raw_bar_path, bar_confidence, plate_radii, track
+        )
+        for track in tracks
+    }
+    compatibility_track, compatibility = select_requested_exercise_track(
+        exercise_spec.compatibility_policy,
+        tracks,
+        raw_bar_path,
+        bar_confidence,
+        plate_radii,
+        reference.plate_radius,
+        fps,
+        equipment_provenance,
+        shaft_support_by_track,
+    )
+    if compatibility_track is None or not compatibility.compatible:
+        raise ExerciseMismatchError(exercise_key, compatibility)
     _validate_equipment_track(raw_bar_path, bar_confidence, plate_radii, reference, fps)
+    if lifter is not None and lifter.track_id != compatibility_track.track_id:
+        anatomy_candidate = False
+        pose_quality_warning = (
+            "The equipment-associated person differs from the independently "
+            "selected anatomy track, so limb scoring was suppressed."
+        )
     bar_path = _smooth_points(
         _interpolate_short_gaps(raw_bar_path, max(2, int(fps * 0.20))),
         window=max(5, int(fps // 6) | 1),
@@ -2265,6 +2440,11 @@ def _analyze_video_once(
         "source_start_frame": source_start_frame + 1,
         "output_video": str(video_output_path),
         "exercise": exercise_key,
+        "exercise_compatibility": {
+            **compatibility.to_dict(),
+            "preflight": preflight_compatibility.to_dict(),
+        },
+        "compatibility_track_id": compatibility_track.track_id,
         "selected_track_id": lifter.track_id if lifter is not None else None,
         "near_arm": resolved_arm,
         "reference_frame": reference.frame_index + 1,
@@ -2302,8 +2482,9 @@ def analyze_video_with_model(
     repetitions; every identity, grip, anatomy, and equipment gate still runs.
     """
     thresholds = [float(min_pose_confidence)]
-    if math.isclose(min_pose_confidence, 0.35, abs_tol=1e-9):
-        thresholds.append(0.30)
+    configured_initial, configured_retry = RUNTIME_CONFIG.pose_confidence_attempts
+    if math.isclose(min_pose_confidence, configured_initial, abs_tol=1e-9):
+        thresholds.append(configured_retry)
     attempted: list[float] = []
     for threshold in thresholds:
         attempted.append(threshold)
