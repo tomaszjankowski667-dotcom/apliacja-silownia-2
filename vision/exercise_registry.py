@@ -27,8 +27,8 @@ EXERCISE_REGISTRY: dict[str, ExerciseSpec] = {
         key="Flat_Dumbbell_Press",
         template_module=_MID_CHEST_MODULE,
         tracking_mode="dumbbell",
-        compatibility_policy="",
-        video_supported=False,
+        compatibility_policy="flat_dumbbell_press",
+        video_supported=True,
     ),
     "Machine_Chest_Press": ExerciseSpec(
         key="Machine_Chest_Press",
@@ -98,9 +98,14 @@ def get_exercise_spec(exercise_key: str) -> ExerciseSpec:
             f"Unknown exercise '{exercise_key}'. Available template keys: {available}"
         ) from error
     if not spec.video_supported:
+        supported = ", ".join(
+            key
+            for key, candidate in EXERCISE_REGISTRY.items()
+            if candidate.video_supported
+        )
         raise ValueError(
             f"Exercise '{exercise_key}' has a biomechanical template but is not yet "
             "supported by the fail-closed video analyzer. "
-            "Currently supported: Flat_Barbell_Press."
+            f"Currently supported: {supported}."
         )
     return spec
