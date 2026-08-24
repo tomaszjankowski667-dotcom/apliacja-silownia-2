@@ -512,12 +512,6 @@ def evaluate_flat_barbell_press(
             "upright_press_pattern",
             "The lifter remains upright, which is incompatible with a flat bench press.",
         ),
-        (
-            evidence.median_bar_to_shoulder_y is not None
-            and evidence.median_bar_to_shoulder_y <= 0.05,
-            "load_below_press_zone",
-            "The tracked load remains below the shoulder press zone.",
-        ),
     )
     for accepted, code, reason in checks:
         if not accepted:

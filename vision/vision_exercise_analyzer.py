@@ -2280,6 +2280,15 @@ def _analyze_video_once(
     )
     if compatibility_track is None or not compatibility.compatible:
         raise ExerciseMismatchError(exercise_key, compatibility)
+    technique_warnings: list[str] = []
+    if (
+        compatibility.evidence.median_bar_to_shoulder_y is not None
+        and compatibility.evidence.median_bar_to_shoulder_y <= 0.05
+    ):
+        technique_warnings.append(
+            "The bar path may be below the preferred press zone; review depth "
+            "and shoulder position."
+        )
     _validate_equipment_track(raw_bar_path, bar_confidence, plate_radii, reference, fps)
     if lifter is not None and lifter.track_id != compatibility_track.track_id:
         anatomy_candidate = False
@@ -2451,6 +2460,7 @@ def _analyze_video_once(
         "reference_bar_center": [round(float(value), 1) for value in reference.bar_center],
         "analysis_mode": "full_anatomy" if anatomy_reliable else "bar_path_only",
         "pose_quality_warning": pose_quality_warning,
+        "technique_warnings": technique_warnings,
         "completed_reps": len(reps),
         "rep_scores": rep_score_rows,
         "bar_path_rep_scores": [row["bar_path_score"] for row in rep_score_rows],
