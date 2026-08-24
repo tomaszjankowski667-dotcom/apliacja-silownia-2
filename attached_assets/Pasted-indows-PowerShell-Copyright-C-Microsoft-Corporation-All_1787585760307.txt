@@ -1,0 +1,182 @@
+indows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+PS C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main> py -3 vision\vision_exercise_analyzer.py --video ".\k1.mp4" --out ".\wynik_sztanga_auto.mp4" --exercise Flat_Barbell_Press
+Downloading MediaPipe pose model (one-time setup)...
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+WARNING: Logging before InitGoogle() is written to STDERR
+W0000 00:00:1787585652.535672    7280 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1787585652.550863    4808 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1787585652.577944   15540 landmark_projection_calculator.cc:81] Using NORM_RECT without IMAGE_DIMENSIONS is only supported for the square ROI. Provide IMAGE_DIMENSIONS or use PROJECTION_MATRIX.
+Traceback (most recent call last):
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 2622, in <module>
+    _main()
+    ~~~~~^^
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 2611, in _main
+    analyze_video_with_model(
+    ~~~~~~~~~~~~~~~~~~~~~~~~^
+        args.video,
+        ^^^^^^^^^^^
+    ...<4 lines>...
+        allow_uncertain_equipment=args.allow_uncertain_equipment,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 2575, in analyze_video_with_model
+    summary = _analyze_video_once(
+        video_input_path,
+    ...<5 lines>...
+        allow_uncertain_equipment=allow_uncertain_equipment,
+    )
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 2345, in _analyze_video_once
+    raise ExerciseMismatchError(exercise_key, compatibility)
+vision.exercise_compatibility.ExerciseMismatchError: Requested exercise mismatch [non_barbell_load_geometry]: The visible round load does not show a long free-bar lever or repeated shared-shaft evidence through the two-hand grip.                                                                                                                                   
+PS C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main> py -3 vision\vision_exercise_analyzer.py --video ".\test_exercise.mp4" --out ".\wynik_hantle_full_anatomy.mp4" --exercise Flat_Dumbbell_Press                                                                                                                                                    
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+WARNING: Logging before InitGoogle() is written to STDERR
+W0000 00:00:1787585699.513735   13408 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1787585699.550638   18896 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1787585699.585913   13336 landmark_projection_calculator.cc:81] Using NORM_RECT without IMAGE_DIMENSIONS is only supported for the square ROI. Provide IMAGE_DIMENSIONS or use PROJECTION_MATRIX.
+{
+  "input_video": "test_exercise.mp4",
+  "source_start_frame": 1,
+  "output_video": ".\\wynik_hantle_full_anatomy.mp4",
+  "exercise": "Flat_Dumbbell_Press",
+  "exercise_compatibility": {
+    "compatible": true,
+    "code": "dumbbell_press_compatible",
+    "reason": "A visible hand-associated dumbbell follows one continuous flat-press lifter.",
+    "evidence": {
+      "track_id": 0,
+      "equipment_provenance": "visual_dumbbell",
+      "direct_equipment_frames": 434,
+      "pose_supported_frames": 410,
+      "minimum_pose_supported_frames": 12,
+      "pose_support_ratio": 0.9447004608294931,
+      "equipment_vertical_span_pixels": 301.64736396789556,
+      "minimum_vertical_span_pixels": 55.08309344625554,
+      "median_wrist_vertical_gap": 0.014180222648688293,
+      "median_wrist_span": null,
+      "median_torso_angle_degrees": 42.580346074244616,
+      "median_bar_to_shoulder_y": -0.4981289737687401
+    },
+    "preflight": {
+      "compatible": true,
+      "code": "preflight_compatible",
+      "reason": "A stable two-hand, non-upright press setup is present.",
+      "evidence": {
+        "minimum_two_hand_frames": 12,
+        "stable_two_hand_tracks": 8,
+        "median_torso_angles_degrees": [
+          50.98528415795329,
+          39.42851431689359,
+          45.680997468388895,
+          47.51326980717206,
+          43.66034856400109,
+          43.76847703920081,
+          50.79707694352783,
+          46.050976545096006
+        ],
+        "median_wrist_spans": [
+          1.2876809728648584,
+          1.3725958102987796,
+          1.2644374537880114,
+          1.3355976910536684,
+          1.2600554014301748,
+          1.4482504631764215,
+          1.459759471764841,
+          1.426756612550892
+        ]
+      }
+    }
+  },
+  "compatibility_track_id": 0,
+  "selected_track_id": 0,
+  "near_arm": "left",
+  "reference_frame": 1,
+  "reference_bar_center": [
+    574.1,
+    628.3
+  ],
+  "analysis_mode": "bar_path_only",
+  "pose_quality_warning": "Frame 1 does not contain a complete, geometrically valid arm and hip observation.",
+  "technique_warnings": [],
+  "compatibility_override_warning": null,
+  "completed_reps": 3,
+  "rep_scores": [
+    {
+      "detected_rep_number": 1,
+      "bar_path_score": 91,
+      "limb_motion_score": null,
+      "final_score": null
+    },
+    {
+      "detected_rep_number": 2,
+      "bar_path_score": 94,
+      "limb_motion_score": null,
+      "final_score": null
+    },
+    {
+      "detected_rep_number": 3,
+      "bar_path_score": 91,
+      "limb_motion_score": null,
+      "final_score": null
+    }
+  ],
+  "bar_path_rep_scores": [
+    91,
+    94,
+    91
+  ],
+  "limb_motion_rep_scores": [
+    null,
+    null,
+    null
+  ],
+  "overall_rep_scores": [
+    null,
+    null,
+    null
+  ],
+  "bar_path_score": 92,
+  "limb_motion_score": null,
+  "final_score": null,
+  "equipment_tracking_coverage": 0.834,
+  "camera_yaw_degrees": 0.0,
+  "pose_detection_confidence": 0.35,
+  "pose_detection_attempts": [
+    0.35
+  ]
+}
+PS C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main>  py -3 vision\vision_exercise_analyzer.py --video ".\k3.mp4" --out ".\wynik_sztanga_auto.mp4" --exercise Butterfly_Pec_Deck                                                                                                                                                                      
+Traceback (most recent call last):
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 2622, in <module>
+    _main()
+    ~~~~~^^
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 2611, in _main
+    analyze_video_with_model(
+    ~~~~~~~~~~~~~~~~~~~~~~~~^
+        args.video,
+        ^^^^^^^^^^^
+    ...<4 lines>...
+        allow_uncertain_equipment=args.allow_uncertain_equipment,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 2575, in analyze_video_with_model
+    summary = _analyze_video_once(
+        video_input_path,
+    ...<5 lines>...
+        allow_uncertain_equipment=allow_uncertain_equipment,
+    )
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 2122, in _analyze_video_once
+    exercise_spec, levers, _, trajectory_func = _load_exercise_model(exercise_key)
+                                                ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 206, in _load_exercise_model
+    spec = get_exercise_spec(exercise_key)
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\exercise_registry.py", line 106, in get_exercise_spec
+    raise ValueError(
+    ...<3 lines>...
+    )
+ValueError: Exercise 'Butterfly_Pec_Deck' has a biomechanical template but is not yet supported by the fail-closed video analyzer. Currently supported: Flat_Barbell_Press, Flat_Dumbbell_Press.                                                                                                                                                                        
+PS C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main> 
