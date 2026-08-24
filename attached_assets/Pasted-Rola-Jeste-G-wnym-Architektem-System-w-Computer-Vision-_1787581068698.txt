@@ -1,0 +1,36 @@
+Rola:
+Jesteś Głównym Architektem Systemów Computer Vision i Ekspertem Biomechaniki. Twoim zadaniem jest napisanie inteligentnego, centralnego silnika video_trajectory_analyzer.py. Otrzymujesz pełną autonomię w doborze metod programistycznych.
+Główny Cel Projektu (Główny Mózg Operacyjny):
+Ten skrypt to serce aplikacji. Jego zadaniem jest:
+
+Pobrać brudne, zaszumione nagranie wideo (surowe keypoints 2D/3D z dowolnego kąta).
+Oczyścić je matematycznie (tracking, okluzje, wygładzanie).
+Zaimportować wzorce ruchowe i logikę z moich plików w folderze analyze/ oraz parametry antropometryczne z user_data.py( jeśli są złe wzorce naprawić jak coś dobrze na pewno są wzorce z mid_chest).
+Porównać wyczyszczone dane wideo z wzorcami i dokonać pełnej oceny techniki. Skrypt ma na wyjściu wygenerować konkretny raport diagnostyczny (np. co zostało zrobione źle, jakie kąty zostały złamane w danej fazie ruchu).
+Dwupoziomowy System Walidacji (Inteligentne Filtrowanie Wejścia):
+Zanim skrypt oceni technikę, musi mądrze przefiltrować wideo. Zaimplementuj system rozróżniający anomalię środowiskową od błędu technicznego użytkownika:
+
+Hard Rejection (Zjawiska do odrzucenia): Skrypt musi rozpoznać i zignorować obiekty zaburzające analizę: spoterów asekurujących sztangę, osoby przechodzące w tle, dramatyczne błędy modelu AI ("teleportacja" stawów) oraz całkowite niezgodności ćwiczenia (np. nagranie z uginaniem ramion wrzucone do analizy martwego ciągu).
+Soft Tolerance (Akceptacja i ocena złej formy): Jeśli osoba wykonuje zadane ćwiczenie, ale robi to tragicznie źle (np. ekstremalny "koci grzbiet", asymetria, brak głębokości), system w żadnym wypadku nie odrzuca nagrania. To jest główny cel aplikacji – skrypt ma precyzyjnie zmierzyć to załamanie formy, użyć logiki z analyze/ do potwierdzenia błędu i zwrócić to w raporcie jako zdiagnozowany błąd techniczny.
+Wytyczne Techniczne (Podejście Open-Ended):
+Poniżej sugerowane mechanizmy radzenia sobie z wideo. Jako Główny Architekt zidentyfikuj też inne potencjalne problemy (np. motion blur, zmienny klatkaż) i zaimplementuj dla nich poprawki przed fazą oceny.
+
+Tracking i Izolacja: Użyj spójności środka ciężkości, by zablokować analizę tylko na głównym ćwiczącym.
+Agnostycyzm Perspektywy: Użyj macierzy rotacji i wektorów, by z rzutu np. skośnego stworzyć "wirtualny profil boczny/przedni", na którym można oprzeć wiarygodne pomiary kątów dla plików z analyze/.
+Odporność na Zasłonięcia: Ramię maszyny lub ławka często zasłaniają stawy. Użyj Odwrotnej Kinematyki (IK) i stałych proporcji ciała (user_data.py), by zrekonstruować brakujące punkty w przestrzeni.
+Kwaterniony i Kinematyka: Używaj kwaternionów do skomplikowanych rotacji (unikaj Gimbal Lock). Wylicz pochodne (prędkość, przyspieszenie), aby system wiedział, w jakiej fazie ruchu (ekscentryczna, koncentryczna) aktualnie znajduje się ćwiczący.
+Wygładzanie Trajektorii (Signal Processing): Dobierz optymalne filtry (np. Savitzky-Golay, Kalman), by usunąć drgania modelu wizyjnego, zachowując precyzję w punktach zwrotnych.
+Oczekiwany Wynik:
+Zaprojektuj elastyczny i modułowy kod w Pythonie, korzystając z klas obiektowych (np. TrajectorySmoother, TechniqueEvaluator, PerspectiveCorrector). Główna pętla ma łączyć procesy: od wchłonięcia brudnych punktów z wideo, przez filtry matematyczne, aż po ewaluację przez pliki z analyze/ i wyrzucenie końcowej diagnozy. Zadbaj o obsługę błędów przy importowaniu z innych modułów i skomentuj złożone operacje matematyczne. masz do dyspozycji filmiki które ci zaraz wkleję 
+-filmiki z Flat Barbell Bench Press: seria.mp4, k.mp4, k1.mp4, k2.mp4 - przeciętna technika
+-Butterfly_Pec_Deck k3.mp4
+-Incline_Smith_Press k4.mp4
+-Dumbbell_Lateral_Raise k5.mp4
+-Overhead_Press_Barbell k6.mp4, k7.mp4, k11.mp4
+-Machine_Chest_Press k8.mp4, k9.mp4
+-RDL k10.mp4
+-Barbell_Upper_Back_Row k12.mp4
+-Cable_Crunches k13.mp4
+-Cable_Pushdown_Straight_Bar k15.mp4
+-Incline Dumbbell Curl k16.mp4
+-Barbell_Back_Squat k17.mp4

@@ -197,7 +197,39 @@ class ExerciseCompatibilityTests(unittest.TestCase):
         decision = evaluate_flat_barbell_press(evidence)
 
         self.assertFalse(decision.compatible)
-        self.assertEqual(decision.code, "non_barbell_load_geometry")
+        self.assertEqual(decision.code, "guided_or_machine_load_geometry")
+
+    def test_uncertain_projection_track_is_returned_only_for_explicit_override(self):
+        candidate = make_candidate(20.0)
+        path = [
+            np.array([270.0, y])
+            for y in np.linspace(110.0, 130.0, 45)
+        ]
+        args = (
+            "flat_barbell_press",
+            [make_track(candidate, len(path))],
+            path,
+            [1.0] * len(path),
+            [35.0] * len(path),
+            35.0,
+            30.0,
+            "visual_plate",
+            {1: 0.0},
+        )
+
+        strict_track, strict_decision = select_requested_exercise_track(*args)
+        override_track, override_decision = select_requested_exercise_track(
+            *args,
+            return_best_rejected_track=True,
+        )
+
+        self.assertIsNone(strict_track)
+        self.assertEqual(strict_decision.code, "non_barbell_load_geometry")
+        self.assertIsNotNone(override_track)
+        self.assertEqual(
+            override_decision.code,
+            "non_barbell_load_geometry",
+        )
 
     def test_large_dumbbell_plate_without_shared_shaft_is_rejected(self):
         candidate = make_candidate(20.0)
@@ -230,11 +262,12 @@ class ExerciseCompatibilityTests(unittest.TestCase):
         manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
         names = [row["file"] for row in manifest["recordings"]]
 
-        self.assertEqual(len(names), 19)
+        self.assertEqual(len(names), 20)
         self.assertEqual(len(names), len(set(names)))
         self.assertEqual(
             set(names),
             {"k_1787495418440.mp4"}
+            | {"seria_1787581108845.mp4"}
             | {
                 next(
                     Path("attached_assets").glob(f"k{index}_*.mp4")

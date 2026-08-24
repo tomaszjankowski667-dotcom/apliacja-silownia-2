@@ -45,14 +45,41 @@ def main() -> int:
         try:
             with redirect_stdout(StringIO()):
                 summary = analyze_video_with_model(
-                    source, output, manifest["exercise"]
+                    source,
+                    output,
+                    manifest["exercise"],
+                    allow_uncertain_equipment=item.get(
+                        "allow_uncertain_equipment",
+                        False,
+                    ),
                 )
             accepted = True
             compatibility_summary = summary.get("exercise_compatibility")
             detail = f"{summary['completed_reps']} reps"
             expected_reps = item.get("completed_reps")
+            expected_compatibility_codes = set(
+                item.get("compatibility_codes", [])
+            )
+            compatibility_code_ok = (
+                not expected_compatibility_codes
+                or (
+                    compatibility_summary is not None
+                    and compatibility_summary.get("code")
+                    in expected_compatibility_codes
+                )
+            )
+            bar_path_only_ok = (
+                not item.get("require_bar_path_only", False)
+                or (
+                    summary.get("analysis_mode") == "bar_path_only"
+                    and summary.get("limb_motion_score") is None
+                    and summary.get("final_score") is None
+                )
+            )
             passed = (
                 bool(item["compatible"])
+                and compatibility_code_ok
+                and bar_path_only_ok
                 and (
                     expected_reps is None
                     or summary["completed_reps"] == expected_reps
@@ -79,6 +106,14 @@ def main() -> int:
             {
                 "file": item["file"],
                 "expected_compatible": item["compatible"],
+                "allow_uncertain_equipment": item.get(
+                    "allow_uncertain_equipment",
+                    False,
+                ),
+                "require_bar_path_only": item.get(
+                    "require_bar_path_only",
+                    False,
+                ),
                 "accepted": accepted,
                 "passed": passed,
                 "detail": detail,

@@ -1852,6 +1852,7 @@ def _score_reps(
     y_values: np.ndarray,
     bar_confidence: list[float],
     reference: FrameReference,
+    press_zone_depth_ratio: Optional[float] = None,
 ) -> ScoreBreakdown:
     breakdown = ScoreBreakdown()
     if not reps:
@@ -1869,6 +1870,7 @@ def _score_reps(
         1.0,
     ))
     reference_template = trajectory_func(reference_progress, levers, phase="eccentric")
+    press_zone_penalty = _press_zone_depth_penalty(press_zone_depth_ratio)
     for rep_index, rep in enumerate(reps):
         bar_scores: list[float] = []
         limb_scores: list[float] = []
@@ -1894,7 +1896,11 @@ def _score_reps(
                 float(reference.bar_center[0]),
             )
             path_penalty = abs(float(bar[0]) - target_x) / max(8.0, calibration.arm_length_px * 0.23)
-            bar_score = float(np.clip(100.0 - path_penalty * 34.0, 0.0, 100.0))
+            bar_score = float(np.clip(
+                100.0 - path_penalty * 34.0 - press_zone_penalty,
+                0.0,
+                100.0,
+            ))
             bar_scores.append(bar_score)
             breakdown.bar_frame_scores[frame_index] = bar_score
             if elbow_observed_valid[frame_index] and _valid_point(elbow) and _valid_point(wrist):
@@ -1921,6 +1927,26 @@ def _score_reps(
         else:
             rep.score = breakdown.bar_rep_scores[rep_index]
     return breakdown
+
+
+def _press_zone_depth_penalty(
+    normalized_bar_to_shoulder_y: Optional[float],
+) -> float:
+    """Penalize a load path that remains excessively below the shoulders."""
+    if (
+        normalized_bar_to_shoulder_y is None
+        or not math.isfinite(float(normalized_bar_to_shoulder_y))
+    ):
+        return 0.0
+    excess_depth = max(0.0, float(normalized_bar_to_shoulder_y) - 0.05)
+    return float(np.clip(excess_depth * 25.0, 0.0, 25.0))
+
+
+def _can_override_equipment_compatibility(code: str) -> bool:
+    return code in {
+        "uncertain_axial_barbell_projection",
+        "uncertain_barbell_lifter_association",
+    }
 
 
 def _draw_text_panel(frame: np.ndarray, lines: list[tuple[str, tuple[int, int, int]]],
@@ -2278,30 +2304,39 @@ def _analyze_video_once(
         fps,
         equipment_provenance,
         shaft_support_by_track,
+        return_best_rejected_track=allow_uncertain_equipment,
     )
     compatibility_override_warning: Optional[str] = None
     if (
         allow_uncertain_equipment
         and compatibility_track is not None
-        and compatibility.code == "non_barbell_load_geometry"
+        and _can_override_equipment_compatibility(compatibility.code)
     ):
         compatibility_override_warning = (
-            "Equipment geometry is uncertain; analysis was continued because "
-            "--allow-uncertain-equipment was explicitly requested."
+            f"Equipment evidence is uncertain ({compatibility.code}); analysis "
+            "was continued because --allow-uncertain-equipment was explicitly "
+            "requested."
         )
     elif compatibility_track is None or not compatibility.compatible:
         raise ExerciseMismatchError(exercise_key, compatibility)
     technique_warnings: list[str] = []
     if (
         compatibility.evidence.median_bar_to_shoulder_y is not None
-        and compatibility.evidence.median_bar_to_shoulder_y <= 0.05
+        and compatibility.evidence.median_bar_to_shoulder_y > 0.05
     ):
         technique_warnings.append(
             "The bar path may be below the preferred press zone; review depth "
             "and shoulder position."
         )
     _validate_equipment_track(raw_bar_path, bar_confidence, plate_radii, reference, fps)
-    if lifter is not None and lifter.track_id != compatibility_track.track_id:
+    if compatibility_override_warning is not None:
+        anatomy_candidate = False
+        anatomy_reliable = False
+        pose_quality_warning = (
+            "Equipment identity or lifter association is uncertain, so limb "
+            "motion and overall scoring were suppressed."
+        )
+    elif lifter is not None and lifter.track_id != compatibility_track.track_id:
         anatomy_candidate = False
         pose_quality_warning = (
             "The equipment-associated person differs from the independently "
@@ -2405,6 +2440,7 @@ def _analyze_video_once(
             y_values,
             bar_confidence,
             reference,
+            compatibility.evidence.median_bar_to_shoulder_y,
         )
     completed_bar_scores = list(score_breakdown.bar_rep_scores.values())
     if not completed_bar_scores:

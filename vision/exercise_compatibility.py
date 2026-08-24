@@ -427,6 +427,96 @@ def evaluate_flat_barbell_press(
     evidence: CompatibilityEvidence,
 ) -> CompatibilityDecision:
     """Require independent equipment, grip, and posture evidence."""
+    minimum_free_bar_projection = 0.45
+    long_free_bar_projection = 0.70
+    minimum_grip_collinearity = 0.18
+    has_shared_shaft = evidence.bar_shaft_support_ratio >= 0.25
+    plate_outside_grip_x = evidence.median_plate_outside_grip_x
+    has_projected_free_bar_endpoint = (
+        plate_outside_grip_x is not None
+        and plate_outside_grip_x >= minimum_free_bar_projection
+    )
+    has_long_free_bar_lever = (
+        plate_outside_grip_x is not None
+        and plate_outside_grip_x >= long_free_bar_projection
+    )
+    has_repeated_grip_collinearity = (
+        evidence.plate_grip_collinearity_ratio is not None
+        and evidence.plate_grip_collinearity_ratio
+        >= minimum_grip_collinearity
+    )
+    has_free_bar_geometry = (
+        evidence.plate_outside_grip_ratio >= 0.50
+        and (
+            has_long_free_bar_lever
+            or (
+                has_shared_shaft
+                and has_projected_free_bar_endpoint
+                and has_repeated_grip_collinearity
+            )
+        )
+    )
+    uncertain_axial_bar_projection = (
+        evidence.equipment_provenance == "visual_plate"
+        and not has_shared_shaft
+        and evidence.plate_outside_grip_ratio >= 0.75
+        and plate_outside_grip_x is not None
+        and 0.30 <= plate_outside_grip_x < long_free_bar_projection
+        and evidence.median_plate_radius_body_ratio is not None
+        and evidence.median_plate_radius_body_ratio >= 0.45
+        and has_repeated_grip_collinearity
+        and evidence.plate_wrist_distance_iqr is not None
+        and evidence.plate_wrist_distance_iqr >= 0.25
+    )
+
+    if (
+        evidence.pose_supported_frames
+        < evidence.minimum_pose_supported_frames
+    ):
+        if (
+            evidence.equipment_provenance == "visual_plate"
+            and evidence.pose_support_ratio >= 0.22
+            and has_free_bar_geometry
+        ):
+            return CompatibilityDecision(
+                False,
+                "uncertain_barbell_lifter_association",
+                "The load resembles a projected free bar, but too few frames "
+                "connect it to one continuous lifter.",
+                evidence,
+            )
+        return CompatibilityDecision(
+            False,
+            "equipment_pose_disconnected",
+            "Too few observations connect the tracked load to one continuous lifter.",
+            evidence,
+        )
+
+    if evidence.pose_support_ratio < 0.22:
+        return CompatibilityDecision(
+            False,
+            "equipment_pose_disconnected",
+            "The tracked load does not stay vertically aligned with two visible hands.",
+            evidence,
+        )
+
+    if (
+        has_shared_shaft
+        and plate_outside_grip_x is not None
+        and not has_long_free_bar_lever
+        and not (
+            has_projected_free_bar_endpoint
+            and has_repeated_grip_collinearity
+        )
+    ):
+        return CompatibilityDecision(
+            False,
+            "guided_or_machine_load_geometry",
+            "The detected shaft or guide remains inside the two-hand grip "
+            "instead of projecting to a free-bar endpoint.",
+            evidence,
+        )
+
     checks = (
         (
             evidence.direct_equipment_frames
@@ -438,42 +528,6 @@ def evaluate_flat_barbell_press(
             evidence.equipment_provenance == "visual_plate",
             "unconfirmed_barbell_equipment",
             "Hand motion alone cannot confirm that a physical barbell is present.",
-        ),
-        (
-            evidence.pose_supported_frames
-            >= evidence.minimum_pose_supported_frames,
-            "equipment_pose_disconnected",
-            "Too few observations connect the tracked load to one continuous lifter.",
-        ),
-        (
-            evidence.pose_support_ratio >= 0.22,
-            "equipment_pose_disconnected",
-            "The tracked load does not stay vertically aligned with two visible hands.",
-        ),
-        (
-            evidence.plate_outside_grip_ratio >= 0.50
-            and (
-                (
-                    evidence.median_plate_outside_grip_x is not None
-                    and evidence.median_plate_outside_grip_x >= 0.70
-                )
-                or (
-                    evidence.bar_shaft_support_ratio >= 0.25
-                    and (
-                        (
-                            evidence.median_plate_outside_grip_x is not None
-                            and evidence.median_plate_outside_grip_x >= 0.20
-                        )
-                        or (
-                            evidence.median_plate_radius_body_ratio is not None
-                            and evidence.median_plate_radius_body_ratio >= 0.30
-                        )
-                    )
-                )
-            ),
-            "non_barbell_load_geometry",
-            "The visible round load does not show a long barbell lever or a "
-            "repeated shared shaft through the two-hand grip.",
         ),
         (
             evidence.equipment_radius_observations
@@ -516,6 +570,22 @@ def evaluate_flat_barbell_press(
     for accepted, code, reason in checks:
         if not accepted:
             return CompatibilityDecision(False, code, reason, evidence)
+    if uncertain_axial_bar_projection:
+        return CompatibilityDecision(
+            False,
+            "uncertain_axial_barbell_projection",
+            "A large axial plate repeatedly aligns with both hands, but the "
+            "shared shaft is occluded.",
+            evidence,
+        )
+    if not has_free_bar_geometry:
+        return CompatibilityDecision(
+            False,
+            "non_barbell_load_geometry",
+            "The visible round load does not show a long free-bar lever or "
+            "repeated shared-shaft evidence through the two-hand grip.",
+            evidence,
+        )
     return CompatibilityDecision(
         True,
         "compatible",
@@ -545,10 +615,13 @@ def select_requested_exercise_track(
     fps: float,
     equipment_provenance: str,
     bar_shaft_support_by_track: Optional[dict[int, float]] = None,
+    return_best_rejected_track: bool = False,
 ) -> tuple[Optional[object], CompatibilityDecision]:
     """Select one equipment-associated track; never combine people per frame."""
     accepted: list[tuple[CompatibilityEvidence, object, CompatibilityDecision]] = []
-    rejected: list[tuple[CompatibilityEvidence, CompatibilityDecision]] = []
+    rejected: list[
+        tuple[CompatibilityEvidence, object, CompatibilityDecision]
+    ] = []
     preflight_rejections: list[CompatibilityDecision] = []
     for track in tracks:
         preflight = evaluate_barbell_press_preflight([track], fps)
@@ -573,7 +646,7 @@ def select_requested_exercise_track(
         if decision.compatible:
             accepted.append((evidence, track, decision))
         else:
-            rejected.append((evidence, decision))
+            rejected.append((evidence, track, decision))
     if accepted:
         _, track, decision = max(
             accepted,
@@ -591,7 +664,7 @@ def select_requested_exercise_track(
                 item[0].pose_support_ratio,
             ),
         )
-        return track, decision
+        return (track if return_best_rejected_track else None), decision
     if preflight_rejections:
         decision = max(
             preflight_rejections,

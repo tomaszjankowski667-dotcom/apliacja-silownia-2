@@ -18,7 +18,9 @@ from vision.vision_exercise_analyzer import (
     _filter_consistent_reps,
     _anatomy_reliability_warning,
     _aligned_rep_score_rows,
+    _can_override_equipment_compatibility,
     _grip_track_is_reliable,
+    _press_zone_depth_penalty,
     _track_barbell_grip,
     _score_dumbbell_reps,
     _score_reps,
@@ -220,6 +222,54 @@ class FirstFrameReferenceTests(unittest.TestCase):
         self.assertGreaterEqual(result.bar_rep_scores[0], 95)
         self.assertGreaterEqual(result.limb_rep_scores[0], 95)
         self.assertGreaterEqual(result.overall_rep_scores[0], 95)
+
+        low_depth_result = _score_reps(
+            [rep],
+            path,
+            shoulders,
+            elbows,
+            path,
+            [True] * len(path),
+            calibration,
+            {},
+            lambda progress, levers, phase: np.array([0.0, 0.0, 0.0]),
+            y_values,
+            [1.0] * len(path),
+            FrameReference(0, path[0], 45.0),
+            0.85,
+        )
+
+        self.assertGreaterEqual(
+            result.bar_rep_scores[0] - low_depth_result.bar_rep_scores[0],
+            15,
+        )
+
+    def test_press_zone_depth_penalty_uses_downward_image_y(self):
+        self.assertEqual(_press_zone_depth_penalty(-0.40), 0.0)
+        self.assertEqual(_press_zone_depth_penalty(0.05), 0.0)
+        self.assertGreater(_press_zone_depth_penalty(0.80), 0.0)
+
+    def test_uncertainty_override_cannot_bypass_hard_equipment_mismatches(self):
+        self.assertTrue(
+            _can_override_equipment_compatibility(
+                "uncertain_axial_barbell_projection"
+            )
+        )
+        self.assertTrue(
+            _can_override_equipment_compatibility(
+                "uncertain_barbell_lifter_association"
+            )
+        )
+        self.assertFalse(
+            _can_override_equipment_compatibility(
+                "non_barbell_load_geometry"
+            )
+        )
+        self.assertFalse(
+            _can_override_equipment_compatibility(
+                "guided_or_machine_load_geometry"
+            )
+        )
 
     def test_missing_limb_observations_do_not_hide_a_valid_bar_score(self):
         down_y = np.linspace(250.0, 370.0, 36)

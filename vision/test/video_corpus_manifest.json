@@ -1,29 +1,114 @@
 {
   "exercise": "Flat_Barbell_Press",
   "recordings": [
-    {"file": "k_1787495418440.mp4", "compatible": true},
+    {
+      "file": "k_1787495418440.mp4",
+      "compatible": true,
+      "compatibility_codes": ["compatible"]
+    },
     {
       "file": "k1_1787496823763.mp4",
-      "compatible": null,
-      "expected": "reject_uncertain",
-      "note": "The movement is correct, but the axial plate occludes any shared-shaft proof; fail closed."
+      "compatible": true,
+      "allow_uncertain_equipment": true,
+      "require_bar_path_only": true,
+      "compatibility_codes": ["uncertain_axial_barbell_projection"],
+      "note": "Confirmed flat barbell press with an occluded shared shaft; explicit uncertainty mode may score only the equipment path."
     },
-    {"file": "k2_1787496814478.mp4", "compatible": true},
-    {"file": "k3_1787523808216.mp4", "compatible": false},
-    {"file": "k4_1787523814425.mp4", "compatible": true},
-    {"file": "k5_1787523814426.mp4", "compatible": false},
-    {"file": "k6_1787523814426.mp4", "compatible": false},
-    {"file": "k7_1787523814426.mp4", "compatible": false},
-    {"file": "k8_1787523814427.mp4", "compatible": true},
-    {"file": "k9_1787523814427.mp4", "compatible": true},
-    {"file": "k10_1787523814428.mp4", "compatible": false},
-    {"file": "k11_1787523814428.mp4", "compatible": false},
-    {"file": "k12_1787523814428.mp4", "compatible": false},
-    {"file": "k13_1787523814429.mp4", "compatible": false},
-    {"file": "k14_1787523814429.mp4", "compatible": false},
-    {"file": "k15_1787523814423.mp4", "compatible": false},
-    {"file": "k16_1787523814424.mp4", "compatible": false},
-    {"file": "k17_1787523814425.mp4", "compatible": false},
-    {"file": "k18_1787523814425.mp4", "compatible": false}
+    {
+      "file": "k2_1787496814478.mp4",
+      "compatible": true,
+      "compatibility_codes": ["compatible"]
+    },
+    {
+      "file": "k3_1787523808216.mp4",
+      "compatible": false,
+      "rejection_codes": ["guided_or_machine_load_geometry"]
+    },
+    {
+      "file": "k4_1787523814425.mp4",
+      "compatible": false,
+      "rejection_codes": ["guided_or_machine_load_geometry"],
+      "note": "Incline Smith press, not a flat free-bar press."
+    },
+    {
+      "file": "k5_1787523814426.mp4",
+      "compatible": false,
+      "rejection_codes": ["upright_press_pattern"]
+    },
+    {
+      "file": "k6_1787523814426.mp4",
+      "compatible": false,
+      "rejection_codes": ["upright_press_pattern"]
+    },
+    {
+      "file": "k7_1787523814426.mp4",
+      "compatible": false,
+      "rejection_codes": ["equipment_pose_disconnected"]
+    },
+    {
+      "file": "k8_1787523814427.mp4",
+      "compatible": false,
+      "rejection_codes": ["guided_or_machine_load_geometry"],
+      "note": "Machine chest press, not a flat free-bar press."
+    },
+    {
+      "file": "k9_1787523814427.mp4",
+      "compatible": false,
+      "rejection_codes": ["guided_or_machine_load_geometry"],
+      "note": "Machine chest press, not a flat free-bar press."
+    },
+    {
+      "file": "k10_1787523814428.mp4",
+      "compatible": false,
+      "rejection_codes": ["no_two_hand_setup"]
+    },
+    {
+      "file": "k11_1787523814428.mp4",
+      "compatible": false,
+      "rejection_codes": ["upright_press_pattern"]
+    },
+    {
+      "file": "k12_1787523814428.mp4",
+      "compatible": false,
+      "rejection_codes": ["equipment_pose_disconnected"]
+    },
+    {
+      "file": "k13_1787523814429.mp4",
+      "compatible": false,
+      "rejection_codes": ["no_two_hand_setup"]
+    },
+    {
+      "file": "k14_1787523814429.mp4",
+      "compatible": false,
+      "rejection_codes": ["upright_press_pattern"]
+    },
+    {
+      "file": "k15_1787523814423.mp4",
+      "compatible": false,
+      "rejection_codes": ["narrow_grip_pattern"]
+    },
+    {
+      "file": "k16_1787523814424.mp4",
+      "compatible": false,
+      "rejection_codes": ["no_two_hand_setup"]
+    },
+    {
+      "file": "k17_1787523814425.mp4",
+      "compatible": false,
+      "rejection_codes": ["equipment_pose_disconnected"]
+    },
+    {
+      "file": "k18_1787523814425.mp4",
+      "compatible": false,
+      "rejection_codes": ["no_two_hand_setup"]
+    },
+    {
+      "file": "seria_1787581108845.mp4",
+      "compatible": true,
+      "allow_uncertain_equipment": true,
+      "require_bar_path_only": true,
+      "compatibility_codes": ["uncertain_barbell_lifter_association"],
+      "note": "Confirmed flat barbell press with uncertain continuous lifter association; explicit uncertainty mode may score only the equipment path."
+    }
   ]
 }
