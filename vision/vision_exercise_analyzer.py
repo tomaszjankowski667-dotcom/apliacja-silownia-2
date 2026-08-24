@@ -38,7 +38,9 @@ import numpy as np
 
 from vision.exercise_compatibility import (
     ExerciseMismatchError,
+    collect_dumbbell_press_evidence,
     evaluate_barbell_press_preflight,
+    evaluate_flat_dumbbell_press,
     select_requested_exercise_track,
 )
 from vision.exercise_registry import ExerciseSpec, get_exercise_spec
@@ -2288,24 +2290,46 @@ def _analyze_video_once(
             anchor_shoulder,
             initial_detection=(reference.bar_center, reference.plate_radius),
         )
-    shaft_support_by_track = {
-        track.track_id: _bar_shaft_support_ratio(
-            gray_frames, raw_bar_path, bar_confidence, plate_radii, track
+    if dumbbell_mode:
+        compatibility_track = dumbbell_lifter
+        if compatibility_track is None:
+            raise ExerciseMismatchError(
+                exercise_key,
+                evaluate_flat_dumbbell_press(
+                    collect_dumbbell_press_evidence(
+                        PersonTrack(track_id=-1),
+                        raw_bar_path,
+                        bar_confidence,
+                        fps,
+                    )
+                ),
+            )
+        compatibility_evidence = collect_dumbbell_press_evidence(
+            compatibility_track,
+            raw_bar_path,
+            bar_confidence,
+            fps,
         )
-        for track in tracks
-    }
-    compatibility_track, compatibility = select_requested_exercise_track(
-        exercise_spec.compatibility_policy,
-        tracks,
-        raw_bar_path,
-        bar_confidence,
-        plate_radii,
-        reference.plate_radius,
-        fps,
-        equipment_provenance,
-        shaft_support_by_track,
-        return_best_rejected_track=allow_uncertain_equipment,
-    )
+        compatibility = evaluate_flat_dumbbell_press(compatibility_evidence)
+    else:
+        shaft_support_by_track = {
+            track.track_id: _bar_shaft_support_ratio(
+                gray_frames, raw_bar_path, bar_confidence, plate_radii, track
+            )
+            for track in tracks
+        }
+        compatibility_track, compatibility = select_requested_exercise_track(
+            exercise_spec.compatibility_policy,
+            tracks,
+            raw_bar_path,
+            bar_confidence,
+            plate_radii,
+            reference.plate_radius,
+            fps,
+            equipment_provenance,
+            shaft_support_by_track,
+            return_best_rejected_track=allow_uncertain_equipment,
+        )
     compatibility_override_warning: Optional[str] = None
     if (
         allow_uncertain_equipment
@@ -2572,7 +2596,7 @@ def analyze_video_with_model(
 
 
 def _main() -> None:
-    parser = argparse.ArgumentParser(description="Layered barbell exercise-video analyzer")
+    parser = argparse.ArgumentParser(description="Layered exercise-video analyzer")
     parser.add_argument("--video", required=True, help="Input video path")
     parser.add_argument("--out", default="vision_analysis.mp4", help="Annotated output video path")
     parser.add_argument("--exercise", default="Flat_Barbell_Press", help="Exercise key from analyze_mid_chest.py")
