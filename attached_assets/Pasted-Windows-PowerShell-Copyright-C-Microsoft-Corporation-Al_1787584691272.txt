@@ -1,0 +1,65 @@
+Windows PowerShell
+Copyright (C) Microsoft Corporation. All rights reserved.
+
+PS C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main> py -3 vision\vision_exercise_analyzer.py --video ".\test_exercise.mp4" --out ".\wynik_hantle_full_anatomy.mp4" --exercise Flat_Dumbbell_Press
+Traceback (most recent call last):
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 2598, in <module>
+    _main()
+    ~~~~~^^
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 2587, in _main
+    analyze_video_with_model(
+    ~~~~~~~~~~~~~~~~~~~~~~~~^
+        args.video,
+        ^^^^^^^^^^^
+    ...<4 lines>...
+        allow_uncertain_equipment=args.allow_uncertain_equipment,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 2551, in analyze_video_with_model
+    summary = _analyze_video_once(
+        video_input_path,
+    ...<5 lines>...
+        allow_uncertain_equipment=allow_uncertain_equipment,
+    )
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 2120, in _analyze_video_once
+    exercise_spec, levers, _, trajectory_func = _load_exercise_model(exercise_key)
+                                                ~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 204, in _load_exercise_model
+    spec = get_exercise_spec(exercise_key)
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\exercise_registry.py", line 101, in get_exercise_spec
+    raise ValueError(
+    ...<3 lines>...
+    )
+ValueError: Exercise 'Flat_Dumbbell_Press' has a biomechanical template but is not yet supported by the fail-closed video analyzer. Currently supported: Flat_Barbell_Press.
+PS C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main> py -3 vision\vision_exercise_analyzer.py --video ".\k1.mp4" --out ".\wynik_sztanga_auto.mp4" --exercise Flat_Barbell_Press                                                                                                                                                                       
+Downloading MediaPipe pose model (one-time setup)...
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+WARNING: Logging before InitGoogle() is written to STDERR
+W0000 00:00:1787584627.811167   17728 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1787584627.851166    5732 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1787584627.961776    5732 landmark_projection_calculator.cc:81] Using NORM_RECT without IMAGE_DIMENSIONS is only supported for the square ROI. Provide IMAGE_DIMENSIONS or use PROJECTION_MATRIX.
+Traceback (most recent call last):
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 2598, in <module>
+    _main()
+    ~~~~~^^
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 2587, in _main
+    analyze_video_with_model(
+    ~~~~~~~~~~~~~~~~~~~~~~~~^
+        args.video,
+        ^^^^^^^^^^^
+    ...<4 lines>...
+        allow_uncertain_equipment=args.allow_uncertain_equipment,
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 2551, in analyze_video_with_model
+    summary = _analyze_video_once(
+        video_input_path,
+    ...<5 lines>...
+        allow_uncertain_equipment=allow_uncertain_equipment,
+    )
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 2321, in _analyze_video_once
+    raise ExerciseMismatchError(exercise_key, compatibility)
+vision.exercise_compatibility.ExerciseMismatchError: Requested exercise mismatch [non_barbell_load_geometry]: The visible round load does not show a long free-bar lever or repeated shared-shaft evidence through the two-hand grip.                                                                                                                                   
+PS C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main> 
