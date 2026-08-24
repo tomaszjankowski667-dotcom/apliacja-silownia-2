@@ -1,0 +1,24 @@
+PS C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main> py -3 vision\vision_exercise_analyzer.py --video ".\seria.mp4" --out ".\wynik_sztanga_auto.mp4" --exercise Flat_Barbell_Press                                                                                                                                                                    
+Downloading MediaPipe pose model (one-time setup)...
+INFO: Created TensorFlow Lite XNNPACK delegate for CPU.
+WARNING: Logging before InitGoogle() is written to STDERR
+W0000 00:00:1787578169.071034   18168 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1787578169.133927    4020 inference_feedback_manager.cc:121] Feedback manager requires a model with a single signature inference. Disabling support for feedback tensors.
+W0000 00:00:1787578169.272565    3472 landmark_projection_calculator.cc:81] Using NORM_RECT without IMAGE_DIMENSIONS is only supported for the square ROI. Provide IMAGE_DIMENSIONS or use PROJECTION_MATRIX.
+Traceback (most recent call last):
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 2526, in <module>
+    _main()
+    ~~~~~^^
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 2522, in _main
+    analyze_video_with_model(args.video, args.out, args.exercise, model_path=args.model, near_arm=args.near_arm)
+    ~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 2492, in analyze_video_with_model
+    summary = _analyze_video_once(
+        video_input_path,
+    ...<4 lines>...
+        min_pose_confidence=threshold,
+    )
+  File "C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\vision\vision_exercise_analyzer.py", line 2282, in _analyze_video_once
+    raise ExerciseMismatchError(exercise_key, compatibility)
+vision.exercise_compatibility.ExerciseMismatchError: Requested exercise mismatch [load_below_press_zone]: The tracked load remains below the shoulder press zone.
+PS C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main> 
