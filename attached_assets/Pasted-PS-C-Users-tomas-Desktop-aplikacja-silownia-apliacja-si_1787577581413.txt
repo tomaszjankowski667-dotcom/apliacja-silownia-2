@@ -1,0 +1,23 @@
+PS C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main> py -3 -m vision.test.run_video_corpus --start 0 --end 19
+FAIL k_1787495418440.mp4: rejected — Input video does not exist: C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\attached_assets\k_1787495418440.mp4
+FAIL k1_1787496823763.mp4: rejected — Input video does not exist: C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\attached_assets\k1_1787496823763.mp4
+FAIL k2_1787496814478.mp4: rejected — Input video does not exist: C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\attached_assets\k2_1787496814478.mp4
+FAIL k3_1787523808216.mp4: rejected — Input video does not exist: C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\attached_assets\k3_1787523808216.mp4
+FAIL k4_1787523814425.mp4: rejected — Input video does not exist: C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\attached_assets\k4_1787523814425.mp4
+FAIL k5_1787523814426.mp4: rejected — Input video does not exist: C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\attached_assets\k5_1787523814426.mp4
+FAIL k6_1787523814426.mp4: rejected — Input video does not exist: C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\attached_assets\k6_1787523814426.mp4
+FAIL k7_1787523814426.mp4: rejected — Input video does not exist: C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\attached_assets\k7_1787523814426.mp4
+FAIL k8_1787523814427.mp4: rejected — Input video does not exist: C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\attached_assets\k8_1787523814427.mp4
+FAIL k9_1787523814427.mp4: rejected — Input video does not exist: C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\attached_assets\k9_1787523814427.mp4
+FAIL k10_1787523814428.mp4: rejected — Input video does not exist: C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\attached_assets\k10_1787523814428.mp4
+FAIL k11_1787523814428.mp4: rejected — Input video does not exist: C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\attached_assets\k11_1787523814428.mp4
+FAIL k12_1787523814428.mp4: rejected — Input video does not exist: C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\attached_assets\k12_1787523814428.mp4
+FAIL k13_1787523814429.mp4: rejected — Input video does not exist: C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\attached_assets\k13_1787523814429.mp4
+FAIL k14_1787523814429.mp4: rejected — Input video does not exist: C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\attached_assets\k14_1787523814429.mp4
+FAIL k15_1787523814423.mp4: rejected — Input video does not exist: C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\attached_assets\k15_1787523814423.mp4
+FAIL k16_1787523814424.mp4: rejected — Input video does not exist: C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\attached_assets\k16_1787523814424.mp4
+FAIL k17_1787523814425.mp4: rejected — Input video does not exist: C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\attached_assets\k17_1787523814425.mp4
+FAIL k18_1787523814425.mp4: rejected — Input video does not exist: C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\attached_assets\k18_1787523814425.mp4
+
+Report: C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main\.local\corpus-results\report-0-19.json
+PS C:\Users\tomas\Desktop\aplikacja silownia\apliacja-silownia-2-main> 
