@@ -584,14 +584,14 @@ def select_requested_exercise_track(
         )
         return track, decision
     if rejected:
-        _, decision = max(
+        _, track, decision = max(
             rejected,
             key=lambda item: (
                 item[0].pose_supported_frames,
                 item[0].pose_support_ratio,
             ),
         )
-        return None, decision
+        return track, decision
     if preflight_rejections:
         decision = max(
             preflight_rejections,

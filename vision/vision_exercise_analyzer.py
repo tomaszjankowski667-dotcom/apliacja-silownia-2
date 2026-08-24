@@ -2074,6 +2074,7 @@ def _analyze_video_once(
     model_path: Optional[str | Path] = None,
     near_arm: Optional[str] = None,
     min_pose_confidence: float = 0.35,
+    allow_uncertain_equipment: bool = False,
 ) -> dict:
     """
     Analyze a chest-exercise video and write an annotated result.
@@ -2278,7 +2279,17 @@ def _analyze_video_once(
         equipment_provenance,
         shaft_support_by_track,
     )
-    if compatibility_track is None or not compatibility.compatible:
+    compatibility_override_warning: Optional[str] = None
+    if (
+        allow_uncertain_equipment
+        and compatibility_track is not None
+        and compatibility.code == "non_barbell_load_geometry"
+    ):
+        compatibility_override_warning = (
+            "Equipment geometry is uncertain; analysis was continued because "
+            "--allow-uncertain-equipment was explicitly requested."
+        )
+    elif compatibility_track is None or not compatibility.compatible:
         raise ExerciseMismatchError(exercise_key, compatibility)
     technique_warnings: list[str] = []
     if (
@@ -2461,6 +2472,7 @@ def _analyze_video_once(
         "analysis_mode": "full_anatomy" if anatomy_reliable else "bar_path_only",
         "pose_quality_warning": pose_quality_warning,
         "technique_warnings": technique_warnings,
+        "compatibility_override_warning": compatibility_override_warning,
         "completed_reps": len(reps),
         "rep_scores": rep_score_rows,
         "bar_path_rep_scores": [row["bar_path_score"] for row in rep_score_rows],
@@ -2483,6 +2495,7 @@ def analyze_video_with_model(
     model_path: Optional[str | Path] = None,
     near_arm: Optional[str] = None,
     min_pose_confidence: float = 0.35,
+    allow_uncertain_equipment: bool = False,
 ) -> dict:
     """
     Analyze a video with one conservative cross-platform retry.
@@ -2506,6 +2519,7 @@ def analyze_video_with_model(
                 model_path=model_path,
                 near_arm=near_arm,
                 min_pose_confidence=threshold,
+                allow_uncertain_equipment=allow_uncertain_equipment,
             )
             summary["pose_detection_confidence"] = round(threshold, 2)
             summary["pose_detection_attempts"] = [round(value, 2) for value in attempted]
@@ -2528,8 +2542,20 @@ def _main() -> None:
     parser.add_argument("--exercise", default="Flat_Barbell_Press", help="Exercise key from analyze_mid_chest.py")
     parser.add_argument("--near-arm", choices=("left", "right"), help="Optional manual camera-near arm override")
     parser.add_argument("--model", help="Optional MediaPipe .task model path")
+    parser.add_argument(
+        "--allow-uncertain-equipment",
+        action="store_true",
+        help="Continue scoring when the requested equipment is visually ambiguous.",
+    )
     args = parser.parse_args()
-    analyze_video_with_model(args.video, args.out, args.exercise, model_path=args.model, near_arm=args.near_arm)
+    analyze_video_with_model(
+        args.video,
+        args.out,
+        args.exercise,
+        model_path=args.model,
+        near_arm=args.near_arm,
+        allow_uncertain_equipment=args.allow_uncertain_equipment,
+    )
 
 
 if __name__ == "__main__":
