@@ -9,8 +9,10 @@ import numpy as np
 from vision.exercise_compatibility import (
     CompatibilityEvidence,
     collect_barbell_press_evidence,
+    collect_dumbbell_press_evidence,
     evaluate_barbell_press_preflight,
     evaluate_flat_barbell_press,
+    evaluate_flat_dumbbell_press,
     select_requested_exercise_track,
 )
 from vision.exercise_registry import get_exercise_spec
@@ -125,6 +127,24 @@ class ExerciseCompatibilityTests(unittest.TestCase):
         evidence = collect(candidate, path)
 
         self.assertTrue(evaluate_flat_barbell_press(evidence).compatible)
+
+    def test_hand_associated_dumbbell_press_is_accepted(self):
+        candidate = make_candidate(20.0)
+        path = [
+            np.array([165.0, y])
+            for y in np.linspace(110.0, 130.0, 45)
+        ]
+        evidence = collect_dumbbell_press_evidence(
+            make_track(candidate, len(path)),
+            path,
+            [1.0] * len(path),
+            30.0,
+        )
+        decision = evaluate_flat_dumbbell_press(evidence)
+
+        self.assertTrue(get_exercise_spec("Flat_Dumbbell_Press").video_supported)
+        self.assertTrue(decision.compatible)
+        self.assertEqual(decision.code, "dumbbell_press_compatible")
 
     def test_upright_overhead_press_is_rejected(self):
         candidate = make_candidate(88.0)
