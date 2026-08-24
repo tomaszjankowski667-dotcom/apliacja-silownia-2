@@ -61,6 +61,27 @@ class CompatibilityDecision:
         }
 
 
+@dataclass(frozen=True)
+class DumbbellCompatibilityEvidence:
+    """Evidence that one tracked hand/load belongs to a dumbbell press."""
+
+    track_id: Optional[int]
+    equipment_provenance: str
+    direct_equipment_frames: int
+    pose_supported_frames: int
+    minimum_pose_supported_frames: int
+    pose_support_ratio: float
+    equipment_vertical_span_pixels: Optional[float]
+    minimum_vertical_span_pixels: float
+    median_wrist_vertical_gap: Optional[float]
+    median_wrist_span: Optional[float]
+    median_torso_angle_degrees: Optional[float]
+    median_bar_to_shoulder_y: Optional[float] = None
+
+    def to_dict(self) -> dict:
+        return asdict(self)
+
+
 class ExerciseMismatchError(RuntimeError):
     """Raised before repetition detection when the requested movement is absent."""
 
@@ -594,12 +615,188 @@ def evaluate_flat_barbell_press(
     )
 
 
+def collect_dumbbell_press_evidence(
+    track: object,
+    equipment_path: Sequence[object],
+    equipment_confidence: Sequence[float],
+    fps: float,
+) -> DumbbellCompatibilityEvidence:
+    """Relate a hand-following dumbbell path to one continuous person track."""
+    samples = list(getattr(track, "samples", []))
+    candidate_by_frame = {
+        int(getattr(sample, "frame_index")): getattr(sample, "candidate")
+        for sample in samples
+    }
+    direct_indices = [
+        index
+        for index, (point, quality) in enumerate(
+            zip(equipment_path, equipment_confidence)
+        )
+        if float(quality) >= 0.70 and _valid_point(point)
+    ]
+    rows: list[dict[str, Optional[float]]] = []
+    for index in direct_indices:
+        candidate = candidate_by_frame.get(index)
+        if candidate is None:
+            continue
+        points = getattr(candidate, "points", {})
+        visibility = getattr(candidate, "visibility", {})
+        wrist_options = [
+            points[wrist_index]
+            for wrist_index in (LEFT_WRIST, RIGHT_WRIST)
+            if wrist_index in points
+            and float(visibility.get(wrist_index, 0.0)) >= 0.25
+            and _valid_point(points[wrist_index])
+        ]
+        if not wrist_options:
+            continue
+        dumbbell = np.asarray(equipment_path[index], dtype=float)
+        wrist = min(
+            wrist_options,
+            key=lambda point: float(np.linalg.norm(np.asarray(point) - dumbbell)),
+        )
+        body_scale = max(24.0, float(getattr(candidate, "body_scale", 24.0)))
+        shoulder = (
+            np.asarray(points[LEFT_SHOULDER], dtype=float)
+            + np.asarray(points[RIGHT_SHOULDER], dtype=float)
+        ) / 2.0 if all(
+            landmark in points
+            and float(visibility.get(landmark, 0.0)) >= 0.25
+            and _valid_point(points[landmark])
+            for landmark in (LEFT_SHOULDER, RIGHT_SHOULDER)
+        ) else None
+        hip = (
+            np.asarray(points[LEFT_HIP], dtype=float)
+            + np.asarray(points[RIGHT_HIP], dtype=float)
+        ) / 2.0 if all(
+            landmark in points
+            and float(visibility.get(landmark, 0.0)) >= 0.25
+            and _valid_point(points[landmark])
+            for landmark in (LEFT_HIP, RIGHT_HIP)
+        ) else None
+        torso_angle = None
+        bar_shoulder_y = None
+        if shoulder is not None and hip is not None:
+            torso = hip - shoulder
+            torso_angle = math.degrees(
+                math.atan2(abs(float(torso[1])), abs(float(torso[0])))
+            )
+            bar_shoulder_y = float(dumbbell[1] - shoulder[1]) / body_scale
+        rows.append(
+            {
+                "wrist_gap": float(np.linalg.norm(dumbbell - wrist)) / body_scale,
+                "torso_angle": torso_angle,
+                "bar_shoulder_y": bar_shoulder_y,
+            }
+        )
+    direct_points = [
+        np.asarray(equipment_path[index], dtype=float)
+        for index in direct_indices
+    ]
+    vertical_span = (
+        float(
+            np.percentile(np.asarray(direct_points)[:, 1], 90)
+            - np.percentile(np.asarray(direct_points)[:, 1], 10)
+        )
+        if direct_points
+        else None
+    )
+    minimum_pose_frames = max(8, int(round(float(fps) * 0.40)))
+    return DumbbellCompatibilityEvidence(
+        track_id=getattr(track, "track_id", None),
+        equipment_provenance="visual_dumbbell",
+        direct_equipment_frames=len(direct_indices),
+        pose_supported_frames=len(rows),
+        minimum_pose_supported_frames=minimum_pose_frames,
+        pose_support_ratio=len(rows) / max(1, len(direct_indices)),
+        equipment_vertical_span_pixels=vertical_span,
+        minimum_vertical_span_pixels=max(10.0, float(getattr(track, "last_scale", 24.0)) * 0.18),
+        median_wrist_vertical_gap=_median(rows, "wrist_gap"),
+        median_wrist_span=None,
+        median_torso_angle_degrees=_median(rows, "torso_angle"),
+        median_bar_to_shoulder_y=_median(rows, "bar_shoulder_y"),
+    )
+
+
+def evaluate_flat_dumbbell_press(
+    evidence: DumbbellCompatibilityEvidence,
+) -> CompatibilityDecision:
+    """Validate a hand-associated dumbbell without applying barbell geometry."""
+    if evidence.equipment_provenance != "visual_dumbbell":
+        return CompatibilityDecision(
+            False,
+            "unconfirmed_dumbbell_equipment",
+            "The tracked hand movement was not associated with a visible dumbbell.",
+            evidence,
+        )
+    if evidence.direct_equipment_frames < evidence.minimum_pose_supported_frames:
+        return CompatibilityDecision(
+            False,
+            "insufficient_dumbbell_observations",
+            "Too few direct observations confirm the same dumbbell path.",
+            evidence,
+        )
+    if evidence.pose_supported_frames < evidence.minimum_pose_supported_frames:
+        return CompatibilityDecision(
+            False,
+            "dumbbell_pose_disconnected",
+            "Too few observations connect the dumbbell to one continuous lifter.",
+            evidence,
+        )
+    if evidence.pose_support_ratio < 0.45:
+        return CompatibilityDecision(
+            False,
+            "dumbbell_pose_disconnected",
+            "The tracked dumbbell does not stay associated with the selected hand.",
+            evidence,
+        )
+    if (
+        evidence.equipment_vertical_span_pixels is None
+        or evidence.equipment_vertical_span_pixels
+        < evidence.minimum_vertical_span_pixels
+    ):
+        return CompatibilityDecision(
+            False,
+            "static_dumbbell",
+            "The tracked dumbbell remains effectively static instead of following a press.",
+            evidence,
+        )
+    if (
+        evidence.median_wrist_vertical_gap is None
+        or evidence.median_wrist_vertical_gap > 0.80
+    ):
+        return CompatibilityDecision(
+            False,
+            "dumbbell_pose_disconnected",
+            "The tracked dumbbell is too far from the selected hand.",
+            evidence,
+        )
+    if (
+        evidence.median_torso_angle_degrees is not None
+        and evidence.median_torso_angle_degrees > 80.0
+    ):
+        return CompatibilityDecision(
+            False,
+            "upright_press_pattern",
+            "The lifter remains upright, which is incompatible with a flat press.",
+            evidence,
+        )
+    return CompatibilityDecision(
+        True,
+        "dumbbell_press_compatible",
+        "A visible hand-associated dumbbell follows one continuous flat-press lifter.",
+        evidence,
+    )
+
+
 def evaluate_requested_exercise(
     compatibility_policy: str,
     evidence: CompatibilityEvidence,
 ) -> CompatibilityDecision:
     if compatibility_policy == "flat_barbell_press":
         return evaluate_flat_barbell_press(evidence)
+    if compatibility_policy == "flat_dumbbell_press":
+        return evaluate_flat_dumbbell_press(evidence)
     raise ValueError(
         f"No compatibility evaluator is registered for '{compatibility_policy}'."
     )
